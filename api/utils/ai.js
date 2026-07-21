@@ -4,13 +4,13 @@ export async function generateReportWithFallback(prompt) {
       name: 'Groq',
       url: 'https://api.groq.com/openai/v1/chat/completions',
       key: process.env.GROQ_API_KEY || process.env.VITE_GROQ_API_KEY,
-      model: 'llama3-8b-8192'
+      model: 'llama-3.1-8b-instant'
     },
     {
       name: 'OpenRouter',
       url: 'https://openrouter.ai/api/v1/chat/completions',
       key: process.env.OPENROUTER_API_KEY || process.env.VITE_OPENROUTER_API_KEY,
-      model: 'meta-llama/llama-3-8b-instruct:free'
+      model: 'meta-llama/llama-3.1-8b-instruct:free'
     },
     {
       name: 'Cerebras',
