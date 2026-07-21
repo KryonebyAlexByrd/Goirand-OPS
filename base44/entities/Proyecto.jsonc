@@ -1,0 +1,199 @@
+{
+  "name": "Proyecto",
+  "type": "object",
+  "properties": {
+    "numero_proyecto": {
+      "type": "string"
+    },
+    "descripcion": {
+      "type": "string"
+    },
+    "cliente_nombre": {
+      "type": "string"
+    },
+    "cliente_id": {
+      "type": "string"
+    },
+    "estado": {
+      "type": "string",
+      "enum": [
+        "Activo",
+        "Pausado",
+        "Completado",
+        "Cancelado"
+      ],
+      "default": "Activo"
+    },
+    "prioridad": {
+      "type": "string",
+      "enum": [
+        "Alta",
+        "Media",
+        "Baja"
+      ],
+      "default": "Media"
+    },
+    "fecha_inicio": {
+      "type": "string",
+      "format": "date"
+    },
+    "fecha_entrega_estimada": {
+      "type": "string",
+      "format": "date"
+    },
+    "fecha_entrega_real": {
+      "type": "string",
+      "format": "date"
+    },
+    "monto_total": {
+      "type": "number"
+    },
+    "monto_incluye_iva": {
+      "type": "boolean",
+      "default": true
+    },
+    "anticipo_recibido": {
+      "type": "number",
+      "default": 0
+    },
+    "porcentaje_avance": {
+      "type": "number",
+      "default": 0
+    },
+    "fase_actual": {
+      "type": "string"
+    },
+    "fabricas_asignadas": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "contratistas_asignados": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "nombre": {
+            "type": "string"
+          },
+          "categoria": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "partidas_cotizacion": {
+      "type": "array",
+      "description": "Pedido total del proyecto — partidas extraídas de la(s) cotización(es)",
+      "items": {
+        "type": "object",
+        "properties": {
+          "codigo": {
+            "type": "string"
+          },
+          "tipo_trabajo": {
+            "type": "string"
+          },
+          "descripcion": {
+            "type": "string"
+          },
+          "cantidad_total": {
+            "type": "number"
+          },
+          "cantidad_realizada": {
+            "type": "number"
+          },
+          "unidad": {
+            "type": "string"
+          },
+          "precio_unitario": {
+            "type": "number"
+          },
+          "precio_total": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "cotizaciones_docs": {
+      "type": "array",
+      "description": "URLs de PDFs de cotizaciones adjuntas al proyecto",
+      "items": {
+        "type": "object",
+        "properties": {
+          "nombre": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "folio": {
+            "type": "string"
+          },
+          "fecha": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "pagos_programados": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "planos_adjuntos": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "archivos_adjuntos": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "etapas_entrega": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "fases_completadas": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      }
+    },
+    "tareas_adicionales": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "notas_internas": {
+      "type": "string"
+    },
+    "forma_pago": {
+      "type": "string"
+    },
+    "url_drive": {
+      "type": "string"
+    },
+    "imagen_referencia_url": {
+      "type": "string"
+    },
+    "paso_numero": {
+      "type": "number"
+    },
+    "dias_transcurridos": {
+      "type": "number",
+      "default": 0
+    }
+  },
+  "required": [
+    "descripcion"
+  ]
+}

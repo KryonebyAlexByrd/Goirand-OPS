@@ -1,0 +1,46 @@
+{
+  "name": "CatalogoTrabajo",
+  "type": "object",
+  "properties": {
+    "nombre": {
+      "type": "string",
+      "description": "Nombre del tipo de trabajo / artículo"
+    },
+    "categoria": {
+      "type": "string",
+      "enum": [
+        "Carpintería",
+        "Herrería",
+        "Tapicería",
+        "Pintura",
+        "Acabados",
+        "Ensamble",
+        "Empaque",
+        "Otro"
+      ],
+      "description": "Categoría del artículo"
+    },
+    "fases": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Fases del proceso para este tipo de trabajo (ej: Barniz, Tapicería, Finalizado)"
+    },
+    "imagen_url": {
+      "type": "string",
+      "description": "URL de imagen representativa"
+    },
+    "descripcion": {
+      "type": "string",
+      "description": "Descripción breve"
+    },
+    "activo": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "nombre"
+  ]
+}

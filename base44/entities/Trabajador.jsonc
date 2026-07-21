@@ -1,0 +1,51 @@
+{
+  "name": "Trabajador",
+  "type": "object",
+  "properties": {
+    "nombre": {
+      "type": "string",
+      "description": "Nombre completo del trabajador"
+    },
+    "area": {
+      "type": "string",
+      "enum": [
+        "Carpintería",
+        "Herrería",
+        "Tapicería",
+        "Pintura",
+        "Armado",
+        "Logística",
+        "Calidad",
+        "Otro"
+      ]
+    },
+    "puesto": {
+      "type": "string"
+    },
+    "fabrica": {
+      "type": "string",
+      "enum": [
+        "Tecomatla",
+        "Tláhuac"
+      ]
+    },
+    "telefono": {
+      "type": "string"
+    },
+    "activo": {
+      "type": "boolean",
+      "default": true
+    },
+    "imagen_url": {
+      "type": "string"
+    },
+    "user_email": {
+      "type": "string",
+      "description": "Email del usuario vinculado"
+    }
+  },
+  "required": [
+    "nombre",
+    "area"
+  ]
+}

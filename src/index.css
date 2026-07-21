@@ -1,0 +1,147 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 30 20% 98%;
+    --foreground: 220 15% 15%;
+    --card: 0 0% 100%;
+    --card-foreground: 220 15% 15%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 15% 15%;
+    --primary: 22 82% 51%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 30 15% 95%;
+    --secondary-foreground: 220 15% 25%;
+    --muted: 30 10% 94%;
+    --muted-foreground: 220 10% 45%;
+    --accent: 22 82% 95%;
+    --accent-foreground: 22 82% 35%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 30 15% 90%;
+    --input: 30 15% 88%;
+    --ring: 22 82% 51%;
+    --chart-1: 22 82% 51%;
+    --chart-2: 142 60% 45%;
+    --chart-3: 45 90% 55%;
+    --chart-4: 0 72% 51%;
+    --chart-5: 220 60% 50%;
+    --radius: 0.75rem;
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 220 15% 25%;
+    --sidebar-primary: 22 82% 51%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 22 82% 96%;
+    --sidebar-accent-foreground: 22 82% 35%;
+    --sidebar-border: 30 15% 92%;
+    --sidebar-ring: 22 82% 51%;
+  }
+
+  .dark {
+    --background: 220 15% 8%;
+    --foreground: 30 10% 95%;
+    --card: 220 15% 11%;
+    --card-foreground: 30 10% 95%;
+    --popover: 220 15% 11%;
+    --popover-foreground: 30 10% 95%;
+    --primary: 22 82% 51%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 15% 15%;
+    --secondary-foreground: 30 10% 90%;
+    --muted: 220 15% 18%;
+    --muted-foreground: 30 10% 55%;
+    --accent: 22 82% 15%;
+    --accent-foreground: 22 82% 70%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 220 15% 18%;
+    --input: 220 15% 18%;
+    --ring: 22 82% 51%;
+    --chart-1: 22 82% 55%;
+    --chart-2: 142 60% 50%;
+    --chart-3: 45 90% 60%;
+    --chart-4: 0 72% 55%;
+    --chart-5: 220 60% 55%;
+    --sidebar-background: 220 15% 10%;
+    --sidebar-foreground: 30 10% 90%;
+    --sidebar-primary: 22 82% 55%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 22 82% 12%;
+    --sidebar-accent-foreground: 22 82% 70%;
+    --sidebar-border: 220 15% 18%;
+    --sidebar-ring: 22 82% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading tracking-tight;
+  }
+}
+
+/* --- Goirand OPS Custom Aesthetic Classes --- */
+.hex-bg {
+  background-color: #050505;
+  background-image: 
+    linear-gradient(to bottom, transparent, #000 90%),
+    url("data:image/svg+xml,%3Csvg width='60' height='103.92305' viewBox='0 0 60 103.92305' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M60 25.98076L30 8.66025L0 25.98076L0 60.62177L30 77.94228L60 60.62177Z' stroke='%23888888' stroke-width='1.5' fill='none' stroke-opacity='0.4'/%3E%3Cpath d='M0 77.94228L30 95.26279L60 77.94228' stroke='%23888888' stroke-width='1.5' fill='none' stroke-opacity='0.4'/%3E%3C/svg%3E");
+  background-size: 100% 100%, 80px 138.56px;
+  animation: moveHex 15s linear infinite;
+}
+@keyframes moveHex {
+  0% { background-position: 0 0, 0 0; }
+  100% { background-position: 0 0, 80px 138.56px; }
+}
+@keyframes pulseSlow {
+  0%, 100% { transform: scale(1) translate(0, 0); opacity: 0.6; }
+  50% { transform: scale(1.1) translate(20px, -20px); opacity: 1; }
+}
+.animate-pulse-slow {
+  animation: pulseSlow 8s ease-in-out infinite;
+}
+
+.card-orange-geo {
+  background-color: #ea580c;
+  background-image: 
+    radial-gradient(circle at 100% 0%, rgba(255, 255, 255, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 0% 100%, rgba(0, 0, 0, 0.3) 0%, transparent 50%),
+    url("data:image/svg+xml,%3Csvg width='30' height='30' viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M15 0L30 15L15 30L0 15Z' stroke='%23ffffff' stroke-width='1' fill='none' stroke-opacity='0.1'/%3E%3C/svg%3E");
+  background-size: 100% 100%, 100% 100%, 40px 40px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.9), 0 0 40px rgba(234, 88, 12, 0.4);
+}
+
+.glass-card-dark {
+  background: rgba(20, 20, 22, 0.85);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.8);
+}
+
+.glass-input {
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: white;
+  box-shadow: inset 0 2px 5px rgba(0,0,0,0.2);
+  transition: all 0.3s ease;
+}
+.glass-input:focus {
+  background: rgba(0, 0, 0, 0.4);
+  border-color: rgba(255, 255, 255, 0.6);
+  box-shadow: 0 0 10px rgba(255,255,255,0.2);
+  outline: none;
+}
+.glass-input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}

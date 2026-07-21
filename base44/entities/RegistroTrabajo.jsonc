@@ -1,0 +1,78 @@
+{
+  "name": "RegistroTrabajo",
+  "type": "object",
+  "properties": {
+    "trabajador_nombre": {
+      "type": "string"
+    },
+    "trabajador_id": {
+      "type": "string"
+    },
+    "area": {
+      "type": "string"
+    },
+    "proyecto_id": {
+      "type": "string"
+    },
+    "proyecto_nombre": {
+      "type": "string"
+    },
+    "numero_proyecto": {
+      "type": "string"
+    },
+    "tipo_trabajo": {
+      "type": "string"
+    },
+    "tipo_trabajo_custom": {
+      "type": "string"
+    },
+    "fase": {
+      "type": "string",
+      "description": "Fase del proceso realizada (ej: Barniz, Armado, Finalizado)"
+    },
+    "es_finalizado": {
+      "type": "boolean",
+      "default": false,
+      "description": "true solo cuando la fase seleccionada es Finalizado — indica que el tipo de trabajo está terminado"
+    },
+    "cantidad": {
+      "type": "number",
+      "default": 1
+    },
+    "descripcion": {
+      "type": "string"
+    },
+    "fecha": {
+      "type": "string",
+      "format": "date"
+    },
+    "hora_registro": {
+      "type": "string"
+    },
+    "fotos": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "URLs de fotos del trabajo realizado"
+    },
+    "notas": {
+      "type": "string"
+    },
+    "encargado_nombre": {
+      "type": "string"
+    },
+    "es_contratista": {
+      "type": "boolean",
+      "default": false
+    },
+    "contratista_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "trabajador_nombre",
+    "proyecto_id",
+    "tipo_trabajo"
+  ]
+}

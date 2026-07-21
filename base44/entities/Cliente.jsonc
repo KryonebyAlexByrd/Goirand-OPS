@@ -1,0 +1,45 @@
+{
+  "name": "Cliente",
+  "type": "object",
+  "properties": {
+    "nombre": {
+      "type": "string",
+      "description": "Nombre del contacto"
+    },
+    "empresa": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string"
+    },
+    "telefono": {
+      "type": "string"
+    },
+    "tipo": {
+      "type": "string",
+      "enum": [
+        "Empresa",
+        "Particular"
+      ]
+    },
+    "direccion": {
+      "type": "string"
+    },
+    "imagen_url": {
+      "type": "string"
+    },
+    "rfc": {
+      "type": "string"
+    },
+    "favorito": {
+      "type": "boolean",
+      "default": false
+    },
+    "notas": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "nombre"
+  ]
+}

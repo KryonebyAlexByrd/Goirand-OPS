@@ -1,0 +1,46 @@
+{
+  "name": "AutomatizacionWhatsApp",
+  "type": "object",
+  "properties": {
+    "nombre": {
+      "type": "string",
+      "description": "Nombre del contacto"
+    },
+    "canal": {
+      "type": "string",
+      "enum": [
+        "whatsapp",
+        "email"
+      ],
+      "default": "email",
+      "description": "Canal de envío del reporte"
+    },
+    "numero": {
+      "type": "string",
+      "description": "Número WhatsApp con código de país, ej: 5255... (aún no se envía automáticamente)"
+    },
+    "email": {
+      "type": "string",
+      "description": "Correo electrónico al que se enviará el reporte"
+    },
+    "activo": {
+      "type": "boolean",
+      "default": true
+    },
+    "recibe_diario": {
+      "type": "boolean",
+      "default": true
+    },
+    "recibe_semanal": {
+      "type": "boolean",
+      "default": true
+    },
+    "recibe_mensual": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "nombre"
+  ]
+}

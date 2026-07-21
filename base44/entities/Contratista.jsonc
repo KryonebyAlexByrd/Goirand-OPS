@@ -1,0 +1,56 @@
+{
+  "name": "Contratista",
+  "type": "object",
+  "properties": {
+    "nombre": {
+      "type": "string",
+      "description": "Nombre del contratista"
+    },
+    "email": {
+      "type": "string"
+    },
+    "telefono": {
+      "type": "string"
+    },
+    "categoria": {
+      "type": "string",
+      "enum": [
+        "Herrero",
+        "Carpintero",
+        "Tapicero",
+        "Marmolero",
+        "Pintor",
+        "Electricista",
+        "Otro"
+      ]
+    },
+    "calificacion": {
+      "type": "number"
+    },
+    "experiencia_anos": {
+      "type": "number"
+    },
+    "disponible": {
+      "type": "boolean",
+      "default": true
+    },
+    "habilidades": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "direccion": {
+      "type": "string"
+    },
+    "imagen_url": {
+      "type": "string"
+    },
+    "notas": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "nombre"
+  ]
+}
