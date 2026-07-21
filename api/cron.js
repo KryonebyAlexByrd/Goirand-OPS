@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import nodemailer from 'nodemailer';
+import { generateReportWithFallback } from './utils/ai.js';
 
 export default async function handler(req, res) {
   // Solo permitir GET o POST (Vercel cron usa GET por defecto)
@@ -47,7 +48,7 @@ export default async function handler(req, res) {
 
     // Generar reporte IA
     let reporteIA = null;
-    if (process.env.VITE_GROQ_API_KEY && registros.length > 0) {
+    if (registros.length > 0) {
       const totalPiezas = registros.reduce((s, r) => s + (r.cantidad || 1), 0);
       const dataPromt = registros.slice(0, 100).map(r => `- ${r.trabajador_nombre} (Área: ${r.area || 'N/A'}) - ${r.tipo_trabajo}: ${r.cantidad}pz`).join('\n');
       const prompt = `Actúa como el Gerente de Planta. Escribe un resumen ejecutivo y directo de 2-3 párrafos sobre la producción ${periodo}.
@@ -57,17 +58,9 @@ ${dataPromt}
 El tono debe ser profesional, claro y motivador. No uses formato markdown agresivo, usa HTML básico (<p>, <b>, <ul>, <li>) porque se enviará por correo.`;
 
       try {
-        const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-          method: 'POST',
-          headers: { 'Authorization': `Bearer ${process.env.VITE_GROQ_API_KEY}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ model: 'llama3-8b-8192', messages: [{ role: 'user', content: prompt }], temperature: 0.3 })
-        });
-        if (groqRes.ok) {
-          const aiData = await groqRes.json();
-          reporteIA = aiData.choices[0].message.content;
-        }
+        reporteIA = await generateReportWithFallback(prompt);
       } catch (e) {
-        console.error('Error Groq API:', e);
+        console.error('Error generando reporte IA:', e);
       }
     }
 
