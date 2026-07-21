@@ -60,6 +60,14 @@ export default function Login() {
     
     const perfil = perfiles.find(p => p.id === selectedProfileId);
     if (perfil) {
+      if (perfil.area_principal === "Admin") {
+        const pass = window.prompt("Introduce la contraseña de Administrador:");
+        if (pass !== "goirandreal") {
+          setError("Contraseña incorrecta.");
+          return;
+        }
+      }
+      
       loginLocal(perfil);
       toast.success(`¡Bienvenido de vuelta, ${perfil.nombre}!`);
     } else {
