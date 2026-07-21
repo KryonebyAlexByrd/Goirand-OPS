@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2, MessageCircle, CheckCircle2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 function getHighlightStyles(percent) {
   if (percent === 0) return "border-transparent text-white/50 bg-white/5";
@@ -174,16 +175,16 @@ export default function ReporteObservaciones({ registros, proyectos, periodo }) 
                 Compartir por WhatsApp
               </a>
             </div>
-            <div className="prose prose-sm max-w-none text-foreground
-              [&>h2]:text-lg [&>h2]:font-bold [&>h2]:text-primary [&>h2]:mt-6 [&>h2]:mb-2 [&>h2]:pb-1 [&>h2]:border-b [&>h2]:border-border/40
+            <div className="prose prose-sm max-w-none text-foreground prose-table:w-full prose-table:border-collapse prose-th:border prose-th:border-border/50 prose-th:bg-white/5 prose-th:p-2 prose-th:text-left prose-td:border prose-td:border-border/30 prose-td:p-2 prose-td:text-white/80
+              [&>h2]:text-lg [&>h2]:font-bold [&>h2]:text-orange-500 [&>h2]:mt-6 [&>h2]:mb-2 [&>h2]:pb-1 [&>h2]:border-b [&>h2]:border-border/40
               [&>h3]:text-base [&>h3]:font-semibold [&>h3]:text-foreground [&>h3]:mt-4 [&>h3]:mb-1.5
               [&>p]:text-sm [&>p]:leading-relaxed [&>p]:mb-3 [&>p]:text-foreground/90
               [&>ul]:mb-3 [&>ul]:space-y-1 [&>ul>li]:text-sm [&>ul>li]:leading-relaxed [&>ul>li]:text-foreground/90
               [&>ol]:mb-3 [&>ol]:space-y-1 [&>ol>li]:text-sm [&>ol>li]:leading-relaxed
-              [&>strong]:font-semibold [&>strong]:text-foreground
-              [&>blockquote]:border-l-4 [&>blockquote]:border-primary/40 [&>blockquote]:pl-3 [&>blockquote]:italic [&>blockquote]:text-muted-foreground [&>blockquote]:my-3
+              [&>strong]:font-semibold [&>strong]:text-orange-400
+              [&>blockquote]:border-l-4 [&>blockquote]:border-orange-500/50 [&>blockquote]:pl-3 [&>blockquote]:italic [&>blockquote]:text-muted-foreground [&>blockquote]:my-3
             ">
-              <ReactMarkdown>{observaciones}</ReactMarkdown>
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>{observaciones}</ReactMarkdown>
             </div>
           </div>
         ) : (
