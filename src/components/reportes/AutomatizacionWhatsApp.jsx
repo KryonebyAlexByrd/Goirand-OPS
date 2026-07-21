@@ -8,9 +8,9 @@ import { Badge } from "@/components/ui/badge";
 import { MessageCircle, Mail, Plus, Pencil, Trash2, Clock, Check, X, AlertTriangle, Send, Loader2 } from "lucide-react";
 
 const HORARIOS = [
-  { tipo: "diario", label: "Diario", desc: "Todos los días a las 6:30 PM", color: "bg-white text-foreground border border-border" },
-  { tipo: "semanal", label: "Semanal", desc: "Viernes a las 6:30 PM", color: "bg-primary text-white" },
-  { tipo: "mensual", label: "Mensual", desc: "Día 30 de cada mes, 6:30 PM", color: "bg-foreground text-primary" },
+  { tipo: "diario", label: "Diario", desc: "Todos los días a las 6:30 PM", color: "bg-orange-500 text-white border-transparent" },
+  { tipo: "semanal", label: "Semanal", desc: "Viernes a las 6:30 PM", color: "bg-emerald-600 text-white border-transparent" },
+  { tipo: "mensual", label: "Mensual", desc: "Día 30 de cada mes, 6:30 PM", color: "bg-white text-black border-transparent" },
 ];
 
 function ContactoRow({ contacto, onEdit, onDelete, onToggle, onToggleTipo, onSendWhatsApp, sendingId }) {
@@ -140,14 +140,6 @@ export default function AutomatizacionWhatsApp() {
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* Aviso de estado real de la integración */}
-        <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 flex items-start gap-2.5">
-          <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
-          <p className="text-xs text-amber-800">
-            <strong>WhatsApp:</strong> Como elegimos la opción de botón manual, ahora podrás enviar reportes por WhatsApp dando clic al botón verde "Compartir" después de generar el reporte con IA.{" "}
-            <strong>Email:</strong> 100% Automático — el sistema (Backend Node.js) mandará el resumen diario/semanal automáticamente a los correos configurados.
-          </p>
-        </div>
 
         {/* Horarios info */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">

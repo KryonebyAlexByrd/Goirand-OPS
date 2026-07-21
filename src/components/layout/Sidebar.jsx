@@ -33,13 +33,14 @@ export default function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobile
     )}>
       {/* Logo */}
       <div className="px-4 py-5 border-b border-white/10 flex items-center gap-3 bg-white/5">
-        <div className="w-10 h-10 rounded-xl bg-orange-600 flex items-center justify-center flex-shrink-0 shadow-lg shadow-orange-500/20">
-          <Factory className="w-5 h-5 text-white" />
+        <div className="w-10 h-10 rounded-xl overflow-hidden flex items-center justify-center flex-shrink-0 shadow-lg shadow-orange-500/20">
+          <img src="/pwa-192x192.jpg" alt="Goirand OPS" className="w-full h-full object-cover" />
         </div>
         {(!collapsed || mobileOpen) && (
           <div className="overflow-hidden flex-1">
-            <h1 className="text-lg font-bold text-sidebar-foreground tracking-tight leading-none">Goirand</h1>
-            <p className="text-[11px] text-primary font-semibold uppercase tracking-wider mt-0.5">Control Producción</p>
+            <h1 className="text-lg font-bold text-white tracking-tight leading-none">
+              Goirand <span className="text-orange-500">OPS</span>
+            </h1>
           </div>
         )}
         {/* Mobile close button */}

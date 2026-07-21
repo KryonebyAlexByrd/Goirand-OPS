@@ -52,8 +52,9 @@ export default function AppLayout() {
               <span className="block w-4 h-0.5 bg-foreground rounded" />
             </span>
           </button>
-          <span className="text-sm font-bold">Goirand</span>
-          <span className="text-xs text-primary font-semibold uppercase tracking-wider">Control Producción</span>
+          <h1 className="text-sm font-bold text-white tracking-tight leading-none ml-2">
+            Goirand <span className="text-orange-500">OPS</span>
+          </h1>
         </div>
 
         <div className="p-4 lg:p-6 xl:p-8 max-w-[1400px] relative z-10">
