@@ -76,9 +76,48 @@ export default function WorkForm({ proyectos, trabajadores, contratistas = [], o
   });
 
   const createMutation = useMutation({
-    mutationFn: (data) => supabase.from('registro_trabajo').insert(data).select().then(res => res.data[0]),
+    mutationFn: async (data) => {
+      let finalProjectId = data.proyecto_id;
+      
+      // 1. Si no hay ID de proyecto pero el usuario escribió uno libre, lo creamos
+      if (!finalProjectId && data.proyecto_libre) {
+        const { data: newProy, error: proyError } = await supabase.from('proyecto').insert({
+          descripcion: data.proyecto_libre,
+          numero_proyecto: "S/N",
+          estado: "Activo"
+        }).select().single();
+        
+        if (newProy) {
+          finalProjectId = newProy.id;
+          data.proyecto_nombre = newProy.descripcion;
+        }
+      }
+
+      // 2. Si el tipo de trabajo es nuevo (no está en el catálogo), lo agregamos
+      if (data.tipo_trabajo && data.tipo_trabajo !== "Otro") {
+        const { data: exists } = await supabase.from('catalogo_trabajo')
+          .select('id').ilike('nombre', data.tipo_trabajo).maybeSingle();
+          
+        if (!exists) {
+          await supabase.from('catalogo_trabajo').insert({ 
+            nombre: data.tipo_trabajo, 
+            fases: ["General"] 
+          });
+        }
+      }
+
+      // 3. Insertar el registro final
+      const insertData = { ...data, proyecto_id: finalProjectId || null };
+      delete insertData.proyecto_libre;
+
+      const { data: result, error } = await supabase.from('registro_trabajo').insert(insertData).select();
+      if (error) throw error;
+      return result[0];
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["registros"] });
+      queryClient.invalidateQueries({ queryKey: ["proyectos"] });
+      queryClient.invalidateQueries({ queryKey: ["catalogo"] });
       toast.success("Trabajo registrado exitosamente");
       setForm(f => ({
         ...f,
@@ -96,11 +135,11 @@ export default function WorkForm({ proyectos, trabajadores, contratistas = [], o
       return;
     }
     if (personaType === "trabajador") {
-      const t = trabajadores.find(t => t.id === id);
-      if (t) setForm(f => ({ ...f, trabajador_id: id, trabajador_nombre: t.nombre, trabajador_libre: "", area: t.area || "", es_contratista: false, contratista_id: "" }));
+      const t = trabajadores.find(t => String(t.id) === String(id));
+      if (t) setForm(f => ({ ...f, trabajador_id: t.id, trabajador_nombre: t.nombre, trabajador_libre: "", area: t.area || "", es_contratista: false, contratista_id: "" }));
     } else {
-      const c = contratistas.find(c => c.id === id);
-      if (c) setForm(f => ({ ...f, contratista_id: id, trabajador_nombre: c.nombre, trabajador_libre: "", area: c.categoria || "", es_contratista: true, trabajador_id: "" }));
+      const c = contratistas.find(c => String(c.id) === String(id));
+      if (c) setForm(f => ({ ...f, contratista_id: c.id, trabajador_nombre: c.nombre, trabajador_libre: "", area: c.categoria || "", es_contratista: true, trabajador_id: "" }));
     }
   };
 
@@ -109,8 +148,8 @@ export default function WorkForm({ proyectos, trabajadores, contratistas = [], o
       setForm(f => ({ ...f, proyecto_id: "", proyecto_nombre: "", numero_proyecto: "", tipo_trabajo: "", fase: "", fase_custom: "" }));
       return;
     }
-    const proy = proyectos.find(p => p.id === id);
-    if (proy) setForm(f => ({ ...f, proyecto_id: id, proyecto_nombre: proy.descripcion, numero_proyecto: proy.numero_proyecto || "", proyecto_libre: "", tipo_trabajo: "", fase: "", fase_custom: "" }));
+    const proy = proyectos.find(p => String(p.id) === String(id));
+    if (proy) setForm(f => ({ ...f, proyecto_id: proy.id, proyecto_nombre: proy.descripcion, numero_proyecto: proy.numero_proyecto || "", proyecto_libre: "", tipo_trabajo: "", fase: "", fase_custom: "" }));
   };
 
   const proyectoActual = proyectos.find(p => p.id === form.proyecto_id);
@@ -160,6 +199,7 @@ export default function WorkForm({ proyectos, trabajadores, contratistas = [], o
       contratista_id: form.contratista_id,
       fecha: format(now, "yyyy-MM-dd"),
       hora_registro: format(now, "HH:mm"),
+      proyecto_libre: form.proyecto_libre // Used in mutationFn
     });
   };
 
@@ -206,7 +246,7 @@ export default function WorkForm({ proyectos, trabajadores, contratistas = [], o
                 <SelectTrigger className="glass-input rounded-full px-5"><SelectValue placeholder={`Seleccionar ${personaType}`} /></SelectTrigger>
                 <SelectContent className="glass-card-dark text-white border-white/10">
                   {listaPersonas.map(p => (
-                    <SelectItem key={p.id} value={p.id}>{p.nombre}{p.area || p.categoria ? ` — ${p.area || p.categoria}` : ""}</SelectItem>
+                    <SelectItem key={p.id} value={String(p.id)}>{p.nombre}{p.area || p.categoria ? ` — ${p.area || p.categoria}` : ""}</SelectItem>
                   ))}
                   <SelectItem value="__libre">✏️ Escribir nombre...</SelectItem>
                 </SelectContent>
@@ -238,7 +278,7 @@ export default function WorkForm({ proyectos, trabajadores, contratistas = [], o
                 <SelectTrigger className="glass-input rounded-full px-5"><SelectValue placeholder="Seleccionar proyecto" /></SelectTrigger>
                 <SelectContent className="glass-card-dark text-white border-white/10">
                   {proyectos.filter(p => p.estado === "Activo").map(p => (
-                    <SelectItem key={p.id} value={p.id}>{p.numero_proyecto} — {p.descripcion}</SelectItem>
+                    <SelectItem key={p.id} value={String(p.id)}>{p.numero_proyecto} — {p.descripcion}</SelectItem>
                   ))}
                   <SelectItem value="__libre">✏️ Otro proyecto...</SelectItem>
                 </SelectContent>
