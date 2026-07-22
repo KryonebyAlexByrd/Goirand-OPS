@@ -1,7 +1,9 @@
 import { supabase } from "@/api/supabaseClient";
 
 export async function updateProjectProgress(proyecto_id, tipo_trabajo, cantidad, es_finalizado) {
-  if (!proyecto_id || !tipo_trabajo || !es_finalizado) return;
+  if (!proyecto_id || !tipo_trabajo) return;
+
+  const cantidadNum = parseInt(cantidad, 10) || 0;
 
   try {
     // 1. Obtener proyecto actual
@@ -15,35 +17,45 @@ export async function updateProjectProgress(proyecto_id, tipo_trabajo, cantidad,
 
     let partidas = Array.isArray(p.partidas_cotizacion) ? p.partidas_cotizacion : [];
     
-    let updated = false;
+    let exists = false;
     let totalPiezas = 0;
     let totalRealizadas = 0;
 
     // 2. Modificar la partida correspondiente
     partidas = partidas.map(pt => {
-      if (pt.tipo_trabajo === tipo_trabajo) {
-        updated = true;
-        return {
-          ...pt,
-          cantidad_realizada: (pt.cantidad_realizada || 0) + cantidad
-        };
+      // Normalizamos strings por si hay diferencias de mayúsculas/minúsculas o espacios
+      const ptNombre = (pt.tipo_trabajo || "").trim().toLowerCase();
+      const targetNombre = tipo_trabajo.trim().toLowerCase();
+      
+      if (ptNombre === targetNombre) {
+        exists = true;
+        if (es_finalizado) {
+          return {
+            ...pt,
+            cantidad_realizada: (parseInt(pt.cantidad_realizada, 10) || 0) + cantidadNum
+          };
+        }
       }
       return pt;
     });
 
-    // 3. Si no existía la partida, la agregamos? El usuario dijo "se agrega eso a ese nuevo proyecto"
-    if (!updated) {
+    // 3. Si no existía la partida, la agregamos al proyecto
+    if (!exists) {
       partidas.push({
-        tipo_trabajo,
-        cantidad_total: cantidad,
-        cantidad_realizada: cantidad
+        tipo_trabajo: tipo_trabajo.trim(),
+        cantidad_total: cantidadNum, // Asumimos que si no existía, esta es la cantidad total inicial
+        cantidad_realizada: es_finalizado ? cantidadNum : 0
       });
     }
 
+    // Si la partida ya existía y NO es_finalizado, no hubo cambios reales a las cantidades.
+    // Pero si no existía, acabamos de agregarla, así que sí hay cambios.
+    // De cualquier forma, procedemos a guardar.
+
     // 4. Recalcular avance
     partidas.forEach(pt => {
-      totalPiezas += (pt.cantidad_total || 0);
-      totalRealizadas += (pt.cantidad_realizada || 0);
+      totalPiezas += (parseInt(pt.cantidad_total, 10) || 0);
+      totalRealizadas += (parseInt(pt.cantidad_realizada, 10) || 0);
     });
 
     const porcentaje_avance = totalPiezas > 0 
