@@ -12,6 +12,14 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import { updateProjectProgress } from "@/utils/projectProgress";
 
+// ── Función segura para IDs (soporta HTTP) ─────────────────────────────────
+function generateSafeId() {
+  if (typeof crypto !== "undefined" && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  return 'id_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now().toString(36);
+}
+
 const AREAS = [
   "Contratistas", "Recepción", "Cortado", "Tableros", "Armado",
   "Pulido", "Barnizado", "Empaque", "Entrega", "Otro"
@@ -110,6 +118,7 @@ export default function WorkForm({ proyectos, trabajadores, contratistas = [], o
       // 3. Insertar el registro final
       const insertData = { 
         ...data, 
+        id: generateSafeId(),
         proyecto_id: finalProjectId || null,
         trabajador_id: data.trabajador_id || null,
         contratista_id: data.contratista_id || null,

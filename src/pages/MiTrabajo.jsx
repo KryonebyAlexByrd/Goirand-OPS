@@ -16,6 +16,14 @@ import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { updateProjectProgress } from "@/utils/projectProgress";
 
+// ── Función segura para IDs (soporta HTTP) ─────────────────────────────────
+function generateSafeId() {
+  if (typeof crypto !== "undefined" && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  return 'id_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now().toString(36);
+}
+
 // ── Fases por tipo de trabajo (fallback si no está en catálogo) ────────────
 const FASES_POR_TIPO = {
   "Silla Beatriz": ["Contratista", "Barniz", "Tapicería"],
@@ -459,7 +467,7 @@ export default function MiTrabajo() {
       setPendingItems(items => items.map((it, i) => i === editingPendingIdx ? resolved : it));
       setEditingPendingIdx(null);
     } else {
-      setPendingItems(items => [...items, resolved]);
+      setPendingItems(items => [...items, { ...resolved, id: generateSafeId() }]);
     }
     setItemDraft(EMPTY_ITEM);
   };
