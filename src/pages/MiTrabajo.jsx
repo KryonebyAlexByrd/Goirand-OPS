@@ -404,6 +404,8 @@ export default function MiTrabajo() {
       queryClient.invalidateQueries({ queryKey: ["registros"] });
       queryClient.invalidateQueries({ queryKey: ["mis-registros"] });
       queryClient.invalidateQueries({ queryKey: ["proyectos"] });
+      queryClient.invalidateQueries({ queryKey: ["proyecto"] });
+      queryClient.invalidateQueries({ queryKey: ["registros-proyecto"] });
       queryClient.invalidateQueries({ queryKey: ["catalogo"] });
       setSubmitted(true);
       toast.success(`¡${pendingItems.length} registro(s) guardados!`);

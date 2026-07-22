@@ -135,6 +135,8 @@ export default function WorkForm({ proyectos, trabajadores, contratistas = [], o
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["registros"] });
       queryClient.invalidateQueries({ queryKey: ["proyectos"] });
+      queryClient.invalidateQueries({ queryKey: ["proyecto"] });
+      queryClient.invalidateQueries({ queryKey: ["registros-proyecto"] });
       queryClient.invalidateQueries({ queryKey: ["catalogo"] });
       toast.success("Trabajo registrado exitosamente");
       setForm(f => ({
