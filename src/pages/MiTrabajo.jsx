@@ -122,6 +122,14 @@ function WorkItemForm({ draft, setDraft, proyectos, contratistas, catalogo, user
   if (!tipoValido) missingFields.push("Producto / Trabajo");
   if (!faseValida) missingFields.push("Fase");
 
+  const handleAddClick = () => {
+    if (!canAdd) {
+      toast.error(`Para continuar, falta llenar: ${missingFields.join(", ")}`);
+      return;
+    }
+    onAdd();
+  };
+
   return (
     <div className="space-y-3">
       {/* Contratista (solo si es área de contratistas) */}
@@ -263,7 +271,7 @@ function WorkItemForm({ draft, setDraft, proyectos, contratistas, catalogo, user
       </div>
 
       <div className="flex flex-col gap-2 mt-2">
-        <Button type="button" onClick={onAdd} disabled={!canAdd} className="w-full bg-orange-600 hover:bg-orange-500 text-white rounded-full h-12 shadow-lg border-0 font-bold transition-transform hover:scale-[1.02] disabled:opacity-50 disabled:hover:scale-100">
+        <Button type="button" onClick={handleAddClick} className={`w-full text-white rounded-full h-12 shadow-lg border-0 font-bold transition-transform hover:scale-[1.02] ${canAdd ? 'bg-orange-600 hover:bg-orange-500' : 'bg-zinc-700 hover:bg-zinc-600'}`}>
           <Plus className="w-5 h-5 mr-2" /> {addLabel}
         </Button>
         {!canAdd && missingFields.length > 0 && (
