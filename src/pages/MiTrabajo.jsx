@@ -368,6 +368,7 @@ export default function MiTrabajo() {
         const encargadoFinal = user?.perfil_encargado?.area_principal || "";
         
         await supabase.from('registro_trabajo').insert({
+          id: item.id || generateSafeId(),
           created_by_id: user?.id || null, // Agregado por si la BD lo requiere
           trabajador_nombre: trabajadorFinal,
           trabajador_id: user?.id || null,
