@@ -24,31 +24,22 @@ function generateSafeId() {
   return 'id_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now().toString(36);
 }
 
-// ── Fases por tipo de trabajo (fallback si no está en catálogo) ────────────
-const FASES_POR_TIPO = {
-  "Silla Beatriz": ["Contratista", "Barniz", "Tapicería"],
-  "Poltrona":      ["Contratista", "Barniz", "Tapicería"],
-  "Sofás":         ["Contratista", "Barniz", "Tapicería"],
-  "Consola":       ["Habilitación", "Armado", "Pulido", "Barniz", "Empaque"],
-  "Espejo":        ["Habilitación", "Armado", "Tapicería", "Herraje", "Empaque"],
-  "Base de Cama":  ["Habilitación", "Corte", "Armado", "Pulido", "Barniz"],
-  "Toallado":      ["Habilitación", "Armado", "Pulido", "Barniz", "Empaque"],
-  "Mesa":          ["Contratista", "Armado", "Barniz", "Mármol"],
-};
-const FASES_DEFAULT = [
-  "Habilitación", "Corte", "Armado", "Pulido", "Barniz",
-  "Tapicería", "Herrería", "Herraje", "Calidad", "Contratista", "Empaque", "Mármol",
+// ── Fases hardcodeadas según solicitud ───────────────────────────────────────
+const FASES_NUEVAS = [
+  "Armado",
+  "Barnizado",
+  "Cortado",
+  "Empaque",
+  "Entrega",
+  "Pulido",
+  "Recepción",
+  "Tableros",
+  "Contratistas"
 ];
 
 function getFases(tipoTrabajo, catalogo = []) {
-  const catalogItem = catalogo.find(
-    c => c.nombre?.toLowerCase() === (tipoTrabajo || "").toLowerCase()
-  );
-  if (catalogItem?.fases?.length > 0) return [...catalogItem.fases, "Finalizado"];
-  const key = Object.keys(FASES_POR_TIPO).find(
-    k => k.toLowerCase() === (tipoTrabajo || "").toLowerCase()
-  );
-  return [...(key ? FASES_POR_TIPO[key] : FASES_DEFAULT), "Finalizado"];
+  // Ignoramos el catálogo y los tipos, siempre devolvemos la misma lista
+  return [...FASES_NUEVAS, "Finalizado"];
 }
 
 // ── Item draft vacío ───────────────────────────────────────────────────────

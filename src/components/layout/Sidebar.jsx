@@ -9,14 +9,14 @@ import { cn } from "@/lib/utils";
 
 const navItems = [
   { label: "Dashboard", icon: LayoutDashboard, path: "/", description: "Vista general" },
-  { label: "Registro de Trabajo", icon: ClipboardList, path: "/registro", description: "Captura diaria" },
+  { label: "Historial de Registros", icon: ClipboardList, path: "/registro", description: "Historial por fecha" },
   { label: "Proyectos", icon: FolderKanban, path: "/proyectos", description: "Gestión de proyectos" },
   { label: "Contratistas", icon: HardHat, path: "/contratistas", description: "Equipo externo" },
   { label: "Clientes", icon: Users, path: "/clientes", description: "Base de clientes" },
   { label: "Áreas", icon: LayoutDashboard, path: "/areas", description: "Métricas por área" },
   { label: "Encargados", icon: UserCircle, path: "/trabajadores", description: "Directorio de personal" },
   { label: "Reportes", icon: FileBarChart, path: "/reportes", description: "Reportes y exportación" },
-  { label: "Mi Trabajo", icon: ClipboardList, path: "/mi-trabajo", description: "Vista de trabajador" },
+  { label: "Mi Registro", icon: ClipboardList, path: "/mi-trabajo", description: "Captura de piezas" },
 ];
 
 export default function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobileOpen }) {
