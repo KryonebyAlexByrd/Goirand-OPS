@@ -14,7 +14,6 @@ import { Camera, Upload, X, Loader2, ClipboardList, LogOut, Plus, Pencil, Trash2
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { useAuth as useAuthHook } from "@/hooks/useAuth";
 import { updateProjectProgress } from "@/utils/projectProgress";
 
 // ── Fases por tipo de trabajo (fallback si no está en catálogo) ────────────
