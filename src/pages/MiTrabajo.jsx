@@ -103,11 +103,24 @@ function WorkItemForm({ draft, setDraft, proyectos, contratistas, catalogo, user
     ? targetProject.partidas_cotizacion.filter(p => p.tipo_trabajo)
     : [];
 
-  const tipoFinal = draft.tipo_libre ? draft.tipo_custom : draft.tipo_trabajo;
-  const faseFinal = draft.fase === "__nueva" ? draft.fase_custom.trim() : draft.fase;
-  const canAdd = (draft.proyecto_id || draft.proyecto_libre.trim()) && tipoFinal.trim();
-
   const isContratistas = userArea === "Contratistas" || userArea === "Recepción";
+
+  const isCustomMode = draft.tipo_libre || partidas.length === 0;
+  const tipoFinal = isCustomMode ? draft.tipo_custom : draft.tipo_trabajo;
+  const faseFinal = draft.fase === "__nueva" ? draft.fase_custom.trim() : draft.fase;
+  
+  const proyectoValido = draft.proyecto_id || draft.proyecto_libre.trim();
+  const tipoValido = tipoFinal.trim() !== "";
+  const faseValida = faseFinal.trim() !== "";
+  const contratistaValido = !isContratistas || draft.contratista_id;
+
+  const canAdd = proyectoValido && tipoValido && faseValida && contratistaValido;
+
+  const missingFields = [];
+  if (isContratistas && !draft.contratista_id) missingFields.push("Contratista");
+  if (!proyectoValido) missingFields.push("Proyecto");
+  if (!tipoValido) missingFields.push("Producto / Trabajo");
+  if (!faseValida) missingFields.push("Fase");
 
   return (
     <div className="space-y-3">
@@ -118,14 +131,14 @@ function WorkItemForm({ draft, setDraft, proyectos, contratistas, catalogo, user
           <Select
             value={draft.contratista_id || ""}
             onValueChange={(v) => {
-              const c = contratistas.find(x => x.id === v);
-              setDraft(d => ({ ...d, contratista_id: v, contratista_nombre: c?.nombre || "" }));
+              const c = contratistas.find(x => String(x.id) === String(v));
+              setDraft(d => ({ ...d, contratista_id: c?.id || "", contratista_nombre: c?.nombre || "" }));
             }}
           >
             <SelectTrigger className="glass-input rounded-full h-10 px-4 ring-offset-orange-600 focus:ring-white/50"><SelectValue placeholder="Seleccionar contratista" /></SelectTrigger>
             <SelectContent className="bg-zinc-900 border-zinc-800 text-white rounded-xl shadow-xl">
               {contratistas.map(c => (
-                <SelectItem key={c.id} value={c.id} className="focus:bg-orange-600/20 focus:text-orange-500 rounded-lg cursor-pointer">{c.nombre}</SelectItem>
+                <SelectItem key={c.id} value={String(c.id)} className="focus:bg-orange-600/20 focus:text-orange-500 rounded-lg cursor-pointer">{c.nombre}</SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -141,7 +154,7 @@ function WorkItemForm({ draft, setDraft, proyectos, contratistas, catalogo, user
             if (v === "__libre") {
               setDraft(d => ({ ...d, proyecto_id: "", proyecto_nombre: "", numero_proyecto: "", subproyecto_id: "", subproyecto_nombre: "", tipo_trabajo: "", tipo_libre: false, tipo_custom: "", fase: "", fase_custom: "" }));
             } else {
-              const p = proyectos.find(x => x.id === v);
+              const p = proyectos.find(x => String(x.id) === String(v));
               if (p) setDraft(d => ({ ...d, proyecto_id: p.id, proyecto_nombre: p.descripcion, numero_proyecto: p.numero_proyecto || "", subproyecto_id: "", subproyecto_nombre: "", proyecto_libre: "", tipo_trabajo: "", tipo_libre: false, tipo_custom: "", fase: "", fase_custom: "" }));
             }
           }}
@@ -149,7 +162,7 @@ function WorkItemForm({ draft, setDraft, proyectos, contratistas, catalogo, user
           <SelectTrigger className="glass-input rounded-full h-10 px-4 ring-offset-orange-600 focus:ring-white/50"><SelectValue placeholder="Seleccionar proyecto" /></SelectTrigger>
           <SelectContent className="bg-zinc-900 border-zinc-800 text-white rounded-xl shadow-xl">
             {masterProjects.filter(p => p.estado === "Activo").map(p => (
-              <SelectItem key={p.id} value={p.id} className="focus:bg-orange-600/20 focus:text-orange-500 rounded-lg cursor-pointer">{p.numero_proyecto} — {p.descripcion}</SelectItem>
+              <SelectItem key={p.id} value={String(p.id)} className="focus:bg-orange-600/20 focus:text-orange-500 rounded-lg cursor-pointer">{p.numero_proyecto} — {p.descripcion}</SelectItem>
             ))}
             <SelectItem value="__libre" className="focus:bg-orange-600/20 focus:text-orange-500 rounded-lg cursor-pointer">✏️ Otro proyecto...</SelectItem>
           </SelectContent>
@@ -165,11 +178,11 @@ function WorkItemForm({ draft, setDraft, proyectos, contratistas, catalogo, user
           <Label className="text-xs font-medium text-white/90">Subproyecto / Cotización (Opcional)</Label>
           <Select
             value={draft.subproyecto_id || "ninguno"}
-            onValueChange={(v) => {
+          onValueChange={(v) => {
               if (v === "ninguno") {
                 setDraft(d => ({ ...d, subproyecto_id: "", subproyecto_nombre: "", tipo_trabajo: "", tipo_libre: false, tipo_custom: "" }));
               } else {
-                const sp = subProjects.find(x => x.id === v);
+                const sp = subProjects.find(x => String(x.id) === String(v));
                 if (sp) setDraft(d => ({ ...d, subproyecto_id: sp.id, subproyecto_nombre: sp.descripcion, tipo_trabajo: "", tipo_libre: false, tipo_custom: "" }));
               }
             }}
@@ -178,7 +191,7 @@ function WorkItemForm({ draft, setDraft, proyectos, contratistas, catalogo, user
             <SelectContent className="bg-zinc-900 border-zinc-800 text-white rounded-xl shadow-xl">
               <SelectItem value="ninguno" className="focus:bg-orange-600/20 focus:text-orange-500 rounded-lg cursor-pointer">General (Aplica a todo el proyecto)</SelectItem>
               {subProjects.map(sp => (
-                <SelectItem key={sp.id} value={sp.id} className="focus:bg-orange-600/20 focus:text-orange-500 rounded-lg cursor-pointer">{sp.numero_proyecto} — {sp.descripcion}</SelectItem>
+                <SelectItem key={sp.id} value={String(sp.id)} className="focus:bg-orange-600/20 focus:text-orange-500 rounded-lg cursor-pointer">{sp.numero_proyecto} — {sp.descripcion}</SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -249,9 +262,14 @@ function WorkItemForm({ draft, setDraft, proyectos, contratistas, catalogo, user
         />
       </div>
 
-      <Button type="button" onClick={onAdd} disabled={!canAdd} className="w-full bg-orange-600 hover:bg-orange-500 text-white rounded-full h-12 shadow-lg mt-2 border-0 font-bold transition-transform hover:scale-[1.02] disabled:opacity-50 disabled:hover:scale-100">
-        <Plus className="w-5 h-5 mr-2" /> {addLabel}
-      </Button>
+      <div className="flex flex-col gap-2 mt-2">
+        <Button type="button" onClick={onAdd} disabled={!canAdd} className="w-full bg-orange-600 hover:bg-orange-500 text-white rounded-full h-12 shadow-lg border-0 font-bold transition-transform hover:scale-[1.02] disabled:opacity-50 disabled:hover:scale-100">
+          <Plus className="w-5 h-5 mr-2" /> {addLabel}
+        </Button>
+        {!canAdd && missingFields.length > 0 && (
+          <p className="text-[11px] text-orange-400 font-medium text-center mt-1">Falta llenar: {missingFields.join(", ")}</p>
+        )}
+      </div>
     </div>
   );
 }
@@ -304,8 +322,31 @@ export default function MiTrabajo() {
       const fecha = format(now, "yyyy-MM-dd");
       const hora = format(now, "HH:mm");
       for (const item of items) {
-        const tipoFinal = item.tipo_libre ? item.tipo_custom : item.tipo_trabajo;
+        let finalProjectId = item.proyecto_id;
+        if (!finalProjectId && item.proyecto_libre) {
+          const { data: newProy } = await supabase.from('proyecto').insert({
+            descripcion: item.proyecto_libre,
+            numero_proyecto: "S/N",
+            estado: "Activo"
+          }).select().single();
+          if (newProy) {
+            finalProjectId = newProy.id;
+            item.proyecto_nombre = newProy.descripcion;
+          }
+        }
+
+        const isCustomMode = item.tipo_libre || !item.proyecto_id;
+        const tipoFinal = isCustomMode ? item.tipo_custom : item.tipo_trabajo;
         const faseFinal = item.fase === "__nueva" ? item.fase_custom : item.fase;
+
+        if (tipoFinal && tipoFinal !== "Otro") {
+          const { data: exists } = await supabase.from('catalogo_trabajo')
+            .select('id').ilike('nombre', tipoFinal).maybeSingle();
+          if (!exists) {
+            await supabase.from('catalogo_trabajo').insert({ nombre: tipoFinal, fases: ["General"] });
+          }
+        }
+
         const trabajadorFinal = user?.full_name || user?.perfil_encargado?.nombre || "Encargado";
         const encargadoFinal = user?.perfil_encargado?.area_principal || "";
         
@@ -316,8 +357,8 @@ export default function MiTrabajo() {
           trabajador_id: user?.id || null,
           encargado_nombre: encargadoFinal,
           area_encargado: encargadoFinal,
-          proyecto_id: item.proyecto_id || null,
-          proyecto_nombre: item.proyecto_id ? item.proyecto_nombre : item.proyecto_libre,
+          proyecto_id: finalProjectId || null,
+          proyecto_nombre: finalProjectId ? item.proyecto_nombre : item.proyecto_libre,
           numero_proyecto: item.numero_proyecto || "",
           subproyecto_id: item.subproyecto_id || null,
           contratista_id: item.contratista_id || null,
@@ -345,6 +386,8 @@ export default function MiTrabajo() {
 
       queryClient.invalidateQueries({ queryKey: ["registros"] });
       queryClient.invalidateQueries({ queryKey: ["mis-registros"] });
+      queryClient.invalidateQueries({ queryKey: ["proyectos"] });
+      queryClient.invalidateQueries({ queryKey: ["catalogo"] });
       setSubmitted(true);
       toast.success(`¡${pendingItems.length} registro(s) guardados!`);
       setPendingItems([]);
