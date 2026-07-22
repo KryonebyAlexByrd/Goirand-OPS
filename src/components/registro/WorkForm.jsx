@@ -206,10 +206,17 @@ export default function WorkForm({ proyectos, trabajadores, contratistas = [], o
   const personaSeleccionada = form.trabajador_id || form.contratista_id;
   const proyectoValido = form.proyecto_id || form.proyecto_libre;
   const tipoValido = !!form.tipo_trabajo && form.tipo_trabajo !== "__otro";
-  const areaValida = form.area && (form.area !== "__otro" || form.area_custom);
+  const areaValida = form.area === "__otro" ? !!form.area_custom : true; // Area is optional unless "Otro" is selected
   const nombreValido = personaSeleccionada || form.trabajador_libre;
   const faseValida = faseFinal.trim() !== "";
   const canSubmit = nombreValido && proyectoValido && tipoValido && areaValida && faseValida;
+
+  const missingFields = [];
+  if (!nombreValido) missingFields.push("Persona");
+  if (!proyectoValido) missingFields.push("Proyecto");
+  if (!tipoValido) missingFields.push("Tipo de Trabajo");
+  if (!areaValida) missingFields.push("Área custom");
+  if (!faseValida) missingFields.push("Fase");
 
   const listaPersonas = personaType === "trabajador" ? trabajadores : contratistas;
 
@@ -394,11 +401,16 @@ export default function WorkForm({ proyectos, trabajadores, contratistas = [], o
             <Input value={form.notas} onChange={(e) => setForm(f => ({ ...f, notas: e.target.value }))} placeholder="Observaciones..." className="glass-input rounded-full px-5" />
           </div>
 
-          <Button type="submit" className="w-full sm:w-auto bg-orange-600 hover:bg-orange-500 rounded-full text-white font-bold transition-transform hover:scale-[1.02]" disabled={!canSubmit || createMutation.isPending}>
-            {createMutation.isPending
-              ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Guardando...</>
-              : <><Upload className="w-4 h-4 mr-2" /> Registrar Trabajo</>}
-          </Button>
+          <div className="flex flex-col sm:flex-row items-center gap-3">
+            <Button type="submit" className="w-full sm:w-auto bg-orange-600 hover:bg-orange-500 rounded-full text-white font-bold transition-transform hover:scale-[1.02]" disabled={!canSubmit || createMutation.isPending}>
+              {createMutation.isPending
+                ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Guardando...</>
+                : <><Upload className="w-4 h-4 mr-2" /> Registrar Trabajo</>}
+            </Button>
+            {!canSubmit && missingFields.length > 0 && (
+              <p className="text-xs text-orange-400 font-medium">Falta llenar: {missingFields.join(", ")}</p>
+            )}
+          </div>
         </form>
       </CardContent>
     </Card>
