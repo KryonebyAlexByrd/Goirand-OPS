@@ -63,12 +63,18 @@ export async function updateProjectProgress(proyecto_id, tipo_trabajo, cantidad,
       : 0;
 
     // 5. Guardar en base de datos
-    await supabase.from('proyecto').update({
+    const { error: updateError } = await supabase.from('proyecto').update({
       partidas_cotizacion: partidas,
       porcentaje_avance
     }).eq('id', proyecto_id);
 
+    if (updateError) {
+      console.error("Supabase update error:", updateError);
+      throw updateError;
+    }
+
   } catch (err) {
     console.error("Error updating project progress:", err);
+    throw err;
   }
 }

@@ -112,7 +112,8 @@ export default function WorkForm({ proyectos, trabajadores, contratistas = [], o
         ...data, 
         proyecto_id: finalProjectId || null,
         trabajador_id: data.trabajador_id || null,
-        contratista_id: data.contratista_id || null
+        contratista_id: data.contratista_id || null,
+        created_date: new Date().toISOString()
       };
       delete insertData.proyecto_libre;
 

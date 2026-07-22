@@ -379,6 +379,7 @@ export default function MiTrabajo() {
           notas: globalForm.notas,
           fecha,
           hora_registro: hora,
+          created_date: new Date().toISOString()
         }).select().then(res => {
           if (res.error) throw res.error;
           return res.data?.[0];
