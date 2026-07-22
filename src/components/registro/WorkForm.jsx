@@ -108,7 +108,12 @@ export default function WorkForm({ proyectos, trabajadores, contratistas = [], o
       }
 
       // 3. Insertar el registro final
-      const insertData = { ...data, proyecto_id: finalProjectId || null };
+      const insertData = { 
+        ...data, 
+        proyecto_id: finalProjectId || null,
+        trabajador_id: data.trabajador_id || null,
+        contratista_id: data.contratista_id || null
+      };
       delete insertData.proyecto_libre;
 
       const { data: result, error } = await supabase.from('registro_trabajo').insert(insertData).select();
@@ -123,6 +128,9 @@ export default function WorkForm({ proyectos, trabajadores, contratistas = [], o
       );
 
       return result[0];
+    },
+    onError: (err) => {
+      toast.error("Error al registrar: " + (err.message || JSON.stringify(err)));
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["registros"] });
