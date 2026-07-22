@@ -14,6 +14,8 @@ import { Camera, Upload, X, Loader2, ClipboardList, LogOut, Plus, Pencil, Trash2
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
+import { useAuth as useAuthHook } from "@/hooks/useAuth";
+import { updateProjectProgress } from "@/utils/projectProgress";
 
 // ── Fases por tipo de trabajo (fallback si no está en catálogo) ────────────
 const FASES_POR_TIPO = {
@@ -382,6 +384,14 @@ export default function MiTrabajo() {
           if (res.error) throw res.error;
           return res.data?.[0];
         });
+
+        // Actualizar el progreso del proyecto
+        await updateProjectProgress(
+          finalProjectId,
+          tipoFinal,
+          item.cantidad || 1,
+          faseFinal === "Finalizado"
+        );
       }
     },
     onSuccess: () => {

@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Camera, Upload, X, Loader2, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { updateProjectProgress } from "@/utils/projectProgress";
 
 const AREAS = [
   "Contratistas", "Recepción", "Cortado", "Tableros", "Armado",
@@ -112,6 +113,15 @@ export default function WorkForm({ proyectos, trabajadores, contratistas = [], o
 
       const { data: result, error } = await supabase.from('registro_trabajo').insert(insertData).select();
       if (error) throw error;
+      
+      // Actualizar el progreso del proyecto si está finalizado o es nuevo
+      await updateProjectProgress(
+        finalProjectId,
+        data.tipo_trabajo,
+        data.cantidad || 1,
+        data.es_finalizado || false
+      );
+
       return result[0];
     },
     onSuccess: () => {
