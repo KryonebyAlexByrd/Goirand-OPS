@@ -13,7 +13,10 @@ export async function updateProjectProgress(proyecto_id, tipo_trabajo, cantidad,
       .eq('id', proyecto_id)
       .single();
 
-    if (error || !p) return;
+    if (error || !p) {
+      console.error("Error fetching project for progress update:", error);
+      throw error || new Error("Project not found");
+    }
 
     let partidas = Array.isArray(p.partidas_cotizacion) ? p.partidas_cotizacion : [];
     
