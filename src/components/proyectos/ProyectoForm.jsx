@@ -14,6 +14,13 @@ import { toast } from "sonner";
 // Configuramos el worker de pdfjs a través de un CDN público para evitar problemas de build en Vite
 pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
 
+function generateSafeId() {
+  if (typeof crypto !== "undefined" && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  return 'id_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now().toString(36);
+}
+
 const FABRICAS = ["Tecomatla", "Tláhuac"];
 
 const DEFAULT_FORM = {
@@ -194,8 +201,13 @@ export default function ProyectoForm({ clientes = [], onSubmit, isLoading }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const finalForm = { ...form };
-    delete finalForm.cotizaciones_docs; // Evitar que rompa Supabase ya que no existe en el esquema
+    const finalForm = { 
+      ...form,
+      id: form.id || generateSafeId(),
+      fecha_entrega_estimada: form.fecha_entrega_estimada || null,
+      created_date: new Date().toISOString()
+    };
+    delete finalForm.cotizaciones_docs;
     delete finalForm.cliente_telefono;
     delete finalForm.cliente_email;
     delete finalForm.monto_pagado;
