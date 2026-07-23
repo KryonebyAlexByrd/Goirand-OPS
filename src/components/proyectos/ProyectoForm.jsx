@@ -203,14 +203,14 @@ export default function ProyectoForm({ clientes = [], onSubmit, isLoading }) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
-      {/* Cotización PDF — primera sección para que sea lo primero */}
+      {/* Cotización CSV/Excel — primera sección para que sea lo primero */}
       <div className="rounded-xl border-2 border-dashed border-primary/30 bg-accent/20 p-4 space-y-3">
         <div className="flex items-center gap-2">
           <FileText className="w-4 h-4 text-primary" />
-          <p className="text-sm font-semibold">Subir Cotización PDF</p>
+          <p className="text-sm font-semibold">Subir Cotización Excel/CSV</p>
           <span className="text-xs text-muted-foreground">(recomendado — auto-rellena el proyecto)</span>
         </div>
-        <input ref={fileRef} type="file" accept=".pdf,.xlsx,.csv" className="hidden"
+        <input ref={fileRef} type="file" accept=".xlsx,.csv" className="hidden"
           onChange={e => { handleCotizacion(e.target.files[0]); e.target.value = ""; }} />
         {docCot ? (
           <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2">
@@ -223,7 +223,7 @@ export default function ProyectoForm({ clientes = [], onSubmit, isLoading }) {
           </div>
         ) : (
           <Button type="button" variant="outline" size="sm" onClick={() => fileRef.current?.click()} disabled={extracting}>
-            {extracting ? <><Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> Analizando...</> : <><Upload className="w-3.5 h-3.5 mr-1.5" /> Seleccionar PDF</>}
+            {extracting ? <><Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> Analizando...</> : <><Upload className="w-3.5 h-3.5 mr-1.5" /> Seleccionar Archivo</>}
           </Button>
         )}
 

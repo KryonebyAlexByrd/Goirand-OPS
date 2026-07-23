@@ -65,11 +65,19 @@ export default function Proyectos() {
   });
 
   const createMutation = useMutation({
-    mutationFn: (data) => supabase.from('proyecto').insert(data).select().then(res => res.data[0]),
+    mutationFn: (data) => supabase.from('proyecto').insert(data).select().then(res => {
+      if (res.error) throw res.error;
+      return res.data[0];
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["proyectos"] });
       setDialogOpen(false);
+      toast.success("Proyecto creado exitosamente");
     },
+    onError: (err) => {
+      toast.error("Error al crear proyecto: " + (err.message || JSON.stringify(err)));
+      console.error(err);
+    }
   });
 
 
