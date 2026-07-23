@@ -29,8 +29,14 @@ export default function Clientes() {
 
   const saveMutation = useMutation({
     mutationFn: (data) => editingId
-      ? supabase.from('cliente').update(data).eq('id', editingId).select().then(res => res.data[0])
-      : supabase.from('cliente').insert(data).select().then(res => res.data[0]),
+      ? supabase.from('cliente').update(data).eq('id', editingId).select().then(res => {
+          if (res.error) throw res.error;
+          return res.data[0];
+        })
+      : supabase.from('cliente').insert(data).select().then(res => {
+          if (res.error) throw res.error;
+          return res.data[0];
+        }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["clientes"] });
       setDialogOpen(false);
@@ -38,6 +44,9 @@ export default function Clientes() {
       setForm(EMPTY_FORM);
       toast.success(editingId ? "Cliente actualizado" : "Cliente creado");
     },
+    onError: (err) => {
+      toast.error("Error en cliente: " + (err.message || JSON.stringify(err)));
+    }
   });
 
   const openNew = () => { setEditingId(null); setForm(EMPTY_FORM); setDialogOpen(true); };

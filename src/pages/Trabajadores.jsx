@@ -71,7 +71,8 @@ export default function Trabajadores() {
         // Create via /api/register
         const fakeEmail = `${Date.now()}-${Math.random().toString(36).substring(7)}@goirand.local`;
         const fakePassword = crypto.randomUUID();
-        const response = await fetch('http://localhost:3001/api/register', {
+        const baseUrl = import.meta.env.DEV ? 'http://localhost:3001' : '';
+        const response = await fetch(`${baseUrl}/api/register`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email: fakeEmail, password: fakePassword, name: data.nombre, area: areaFinal })

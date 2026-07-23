@@ -31,9 +31,23 @@ export default function Contratistas() {
   });
 
   const saveMutation = useMutation({
-    mutationFn: (data) => editingId
-      ? supabase.from('contratista').update(data).eq('id', editingId).select().then(res => res.data[0])
-      : supabase.from('contratista').insert(data).select().then(res => res.data[0]),
+    mutationFn: (data) => {
+      const payload = { ...data };
+      if (payload.categoria === "Otro" && payload.categoria_custom) {
+        payload.categoria = payload.categoria_custom.trim();
+      }
+      delete payload.categoria_custom;
+
+      return editingId
+        ? supabase.from('contratista').update(payload).eq('id', editingId).select().then(res => {
+            if (res.error) throw res.error;
+            return res.data[0];
+          })
+        : supabase.from('contratista').insert(payload).select().then(res => {
+            if (res.error) throw res.error;
+            return res.data[0];
+          });
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["contratistas"] });
       setDialogOpen(false);
@@ -41,6 +55,9 @@ export default function Contratistas() {
       setForm(EMPTY_FORM);
       toast.success(editingId ? "Contratista actualizado" : "Contratista creado");
     },
+    onError: (err) => {
+      toast.error("Error en contratista: " + (err.message || JSON.stringify(err)));
+    }
   });
 
   const openNew = () => { setEditingId(null); setForm(EMPTY_FORM); setDialogOpen(true); };
