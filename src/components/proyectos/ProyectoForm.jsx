@@ -6,7 +6,13 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2, Save, Upload, FileText, X, CheckCircle2, Building2 } from "lucide-react";
+import { format } from "date-fns";
+import * as XLSX from "xlsx";
+import * as pdfjsLib from "pdfjs-dist";
 import { toast } from "sonner";
+
+// Configuramos el worker de pdfjs a través de un CDN público para evitar problemas de build en Vite
+pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
 
 const FABRICAS = ["Tecomatla", "Tláhuac"];
 
@@ -55,39 +61,134 @@ export default function ProyectoForm({ clientes = [], onSubmit, isLoading }) {
   const handleCotizacion = async (file) => {
     if (!file) return;
     setExtracting(true);
-    toast.info("Analizando cotización con IA...");
-    const { file_url } = await Promise.resolve({ file_url: 'https://placehold.co/600x400.png' });
-
-    const result = await Promise.resolve({});
-
-    const partidas = (result?.partidas || []).map(p => ({
-      codigo: p.codigo || "",
-      tipo_trabajo: p.tipo_trabajo || "",
-      descripcion: p.descripcion || "",
-      cantidad_total: Number(p.cantidad_total) || 0,
-      cantidad_realizada: 0,
-      unidad: p.unidad || "pz",
-      precio_unitario: Number(p.precio_unitario) || 0,
-      precio_total: Number(p.precio_total) || 0,
-    }));
-
-    setPartidasExtraidas(partidas);
-    setDocCot({ nombre: file.name, url: file_url, folio: result?.folio || "", fecha: result?.fecha || "" });
-
-    // Auto-llenar campos si están vacíos
-    setForm(f => ({
-      ...f,
-      cliente_nombre: f.cliente_nombre || result?.cliente_nombre || "",
-      monto_total: result?.total || f.monto_total || 0,
-      forma_pago: result?.forma_pago || f.forma_pago || "",
-      notas_internas: result?.tiempo_entrega
-        ? (f.notas_internas ? f.notas_internas + "\n" : "") + `Tiempo entrega: ${result.tiempo_entrega}`
-        : f.notas_internas,
-      partidas_cotizacion: partidas,
-      cotizaciones_docs: [{ nombre: file.name, url: file_url, folio: result?.folio || "", fecha: result?.fecha || "" }],
-    }));
-
-    toast.success(`${partidas.length} artículos extraídos de la cotización`);
+    toast.info("Analizando archivo localmente...");
+    
+    // Objeto URL falso para la preview en UI
+    const file_url = URL.createObjectURL(file);
+    let partidas = [];
+    let totalMonto = 0;
+    
+    try {
+      if (file.name.endsWith('.xlsx') || file.name.endsWith('.csv')) {
+        // PARSEO DE EXCEL / CSV
+        const arrayBuffer = await file.arrayBuffer();
+        const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+        const firstSheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[firstSheetName];
+        
+        // Leer como array de arrays
+        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+        
+        for (let row of jsonData) {
+          if (!row || row.length < 4) continue;
+          let clave = "";
+          let descripcion = "";
+          let cant = 0;
+          let pu = 0;
+          let pt = 0;
+          
+          for (let i = 0; i < row.length; i++) {
+             let cell = row[i];
+             if (cell == null || cell === "") continue;
+             if (typeof cell === 'string') {
+               // Buscamos patrones de claves tipo BR-201, C-10, etc.
+               if (cell.match(/^[A-Z]{2,4}-\d+(?:\.\d+)?$/i)) clave = cell.trim();
+               else if (cell.length > 10 && !descripcion && !cell.toLowerCase().includes('total')) descripcion = cell.trim();
+             }
+             if (typeof cell === 'number') {
+               if (cell > 0 && cell < 1000 && cant === 0) cant = cell;
+               else if (cell > 100 && pt === 0 && pu > 0) pt = cell; // Segundo numero grande
+               else if (cell > 100 && pu === 0) pu = cell; // Primer numero grande
+             }
+          }
+          
+          if (clave && descripcion) {
+             const finalCant = cant || 1;
+             const finalPt = pt || (pu * finalCant) || 0;
+             partidas.push({
+               codigo: clave,
+               tipo_trabajo: clave,
+               descripcion: descripcion,
+               cantidad_total: finalCant,
+               cantidad_realizada: 0,
+               unidad: "pz",
+               precio_unitario: pu || 0,
+               precio_total: finalPt
+             });
+             totalMonto += finalPt;
+          }
+        }
+      } else if (file.type === 'application/pdf') {
+        // PARSEO DE PDF MEDIANTE PATRONES EXACTOS (HEURÍSTICA)
+        const arrayBuffer = await file.arrayBuffer();
+        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        let fullText = "";
+        
+        for (let i = 1; i <= pdf.numPages; i++) {
+          const page = await pdf.getPage(i);
+          const textContent = await page.getTextContent();
+          const strings = textContent.items.map(item => item.str);
+          fullText += strings.join(" ") + " \n ";
+        }
+        
+        // Regex para buscar el patrón: CLAVE DESCRIPCION CANTIDAD $ P.U. $ P.T.
+        // Ej: BR-201 Sofá ... 12 $ 102,850.00 $ 1,234,200.00
+        const regex = /([A-Z]{2,4}-\d+(?:\.\d+)?)\s+([\s\S]+?)\s+(\d+)\s+\$\s+([\d,.]+)\s+\$\s+([\d,.]+)/g;
+        let match;
+        
+        while ((match = regex.exec(fullText)) !== null) {
+           const clave = match[1].trim();
+           const descripcionBruta = match[2].trim();
+           const cant = parseInt(match[3], 10);
+           const pu = parseFloat(match[4].replace(/,/g, ''));
+           const pt = parseFloat(match[5].replace(/,/g, ''));
+           
+           // Limpiamos la descripción (tomamos la primera línea limpia o un pedazo como título)
+           const lineasDesc = descripcionBruta.split('\n').map(l => l.trim()).filter(l => l);
+           let tipoTrabajo = clave;
+           let descCorta = descripcionBruta;
+           
+           if (lineasDesc.length > 0) {
+             // A veces la primera línea es la descripción corta
+             tipoTrabajo = lineasDesc[0].substring(0, 40).trim();
+             // Si el tipo quedó muy genérico, usamos la clave
+             if (tipoTrabajo.length < 3) tipoTrabajo = clave;
+           }
+           
+           partidas.push({
+             codigo: clave,
+             tipo_trabajo: tipoTrabajo,
+             descripcion: descCorta,
+             cantidad_total: cant,
+             cantidad_realizada: 0,
+             unidad: "pz",
+             precio_unitario: pu,
+             precio_total: pt
+           });
+           totalMonto += pt;
+        }
+      }
+      
+      if (partidas.length === 0) {
+        toast.warning("No se encontraron piezas que coincidan con el formato (Clave, Cantidad, Precio)");
+      } else {
+        setPartidasExtraidas(partidas);
+        setDocCot({ nombre: file.name, url: file_url, folio: "", fecha: new Date().toISOString() });
+        
+        setForm(f => ({
+          ...f,
+          monto_total: totalMonto > 0 ? totalMonto : f.monto_total,
+          partidas_cotizacion: partidas,
+          cotizaciones_docs: [{ nombre: file.name, url: file_url, folio: "", fecha: new Date().toISOString() }],
+        }));
+        
+        toast.success(`${partidas.length} artículos extraídos del archivo`);
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Error leyendo el archivo. Intenta con un formato diferente.");
+    }
+    
     setExtracting(false);
   };
 
