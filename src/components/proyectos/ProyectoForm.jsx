@@ -196,6 +196,9 @@ export default function ProyectoForm({ clientes = [], onSubmit, isLoading }) {
     e.preventDefault();
     const finalForm = { ...form };
     delete finalForm.cotizaciones_docs; // Evitar que rompa Supabase ya que no existe en el esquema
+    delete finalForm.cliente_telefono;
+    delete finalForm.cliente_email;
+    delete finalForm.monto_pagado;
     onSubmit(finalForm);
   };
 
