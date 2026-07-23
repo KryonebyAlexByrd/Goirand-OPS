@@ -107,7 +107,7 @@ export default function ProyectoForm({ clientes = [], onSubmit, isLoading }) {
              const finalPt = pt || (pu * finalCant) || 0;
              partidas.push({
                codigo: clave,
-               tipo_trabajo: clave,
+               tipo_trabajo: descripcion.split('\n')[0].substring(0, 50).trim(), // Usar un pedazo de la descripción como tipo corto
                descripcion: descripcion,
                cantidad_total: finalCant,
                cantidad_realizada: 0,
@@ -194,7 +194,9 @@ export default function ProyectoForm({ clientes = [], onSubmit, isLoading }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit(form);
+    const finalForm = { ...form };
+    delete finalForm.cotizaciones_docs; // Evitar que rompa Supabase ya que no existe en el esquema
+    onSubmit(finalForm);
   };
 
   const partidasToShow = partidasExtraidas.length > 0 ? partidasExtraidas : (form.partidas_cotizacion || []);
