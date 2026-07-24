@@ -30,7 +30,7 @@ export default function WorkerLayout() {
           }
         >
           <ClipboardList className="w-6 h-6" />
-          <span className="text-[10px] uppercase tracking-wider">Mi Trabajo</span>
+          <span className="text-[10px] uppercase tracking-wider">Mi Registro</span>
         </NavLink>
 
         <NavLink
