@@ -4,6 +4,7 @@ export async function updateProjectProgress(proyecto_id, tipo_trabajo, cantidad,
   if (!proyecto_id || !tipo_trabajo) return;
 
   const cantidadNum = parseInt(cantidad, 10) || 0;
+  if (cantidadNum <= 0) return;
 
   try {
     // 1. Obtener proyecto actual
@@ -15,7 +16,7 @@ export async function updateProjectProgress(proyecto_id, tipo_trabajo, cantidad,
 
     if (error || !p) {
       console.error("Error fetching project for progress update:", error);
-      throw error || new Error("Project not found");
+      return;
     }
 
     let partidas = Array.isArray(p.partidas_cotizacion) ? p.partidas_cotizacion : [];
@@ -24,20 +25,25 @@ export async function updateProjectProgress(proyecto_id, tipo_trabajo, cantidad,
     let totalPiezas = 0;
     let totalRealizadas = 0;
 
+    const targetClean = tipo_trabajo.trim().toLowerCase();
+
     // 2. Modificar la partida correspondiente
     partidas = partidas.map(pt => {
-      // Normalizamos strings por si hay diferencias de mayúsculas/minúsculas o espacios
       const ptNombre = (pt.tipo_trabajo || "").trim().toLowerCase();
-      const targetNombre = tipo_trabajo.trim().toLowerCase();
+      const ptCodigo = (pt.codigo || "").trim().toLowerCase();
       
-      if (ptNombre === targetNombre) {
+      const isMatch = (ptNombre === targetClean) || 
+                      (ptCodigo === targetClean) || 
+                      (targetClean.length > 5 && ptNombre.includes(targetClean)) ||
+                      (ptNombre.length > 5 && targetClean.includes(ptNombre));
+
+      if (isMatch) {
         exists = true;
-        if (es_finalizado) {
-          return {
-            ...pt,
-            cantidad_realizada: (parseInt(pt.cantidad_realizada, 10) || 0) + cantidadNum
-          };
-        }
+        const currentDone = parseInt(pt.cantidad_realizada, 10) || 0;
+        return {
+          ...pt,
+          cantidad_realizada: currentDone + cantidadNum
+        };
       }
       return pt;
     });
@@ -46,16 +52,15 @@ export async function updateProjectProgress(proyecto_id, tipo_trabajo, cantidad,
     if (!exists) {
       partidas.push({
         tipo_trabajo: tipo_trabajo.trim(),
-        cantidad_total: cantidadNum, // Asumimos que si no existía, esta es la cantidad total inicial
-        cantidad_realizada: es_finalizado ? cantidadNum : 0
+        cantidad_total: cantidadNum,
+        cantidad_realizada: cantidadNum,
+        unidad: "pz",
+        precio_unitario: 0,
+        precio_total: 0
       });
     }
 
-    // Si la partida ya existía y NO es_finalizado, no hubo cambios reales a las cantidades.
-    // Pero si no existía, acabamos de agregarla, así que sí hay cambios.
-    // De cualquier forma, procedemos a guardar.
-
-    // 4. Recalcular avance
+    // 4. Recalcular avance global
     partidas.forEach(pt => {
       totalPiezas += (parseInt(pt.cantidad_total, 10) || 0);
       totalRealizadas += (parseInt(pt.cantidad_realizada, 10) || 0);
@@ -73,11 +78,9 @@ export async function updateProjectProgress(proyecto_id, tipo_trabajo, cantidad,
 
     if (updateError) {
       console.error("Supabase update error:", updateError);
-      throw updateError;
     }
 
   } catch (err) {
     console.error("Error updating project progress:", err);
-    throw err;
   }
 }

@@ -9,6 +9,11 @@ export class ErrorBoundary extends React.Component {
   }
 
   static getDerivedStateFromError(error) {
+    // Si el error es de traducción automática de Chrome (removeChild/insertBefore), ignorar y no romper la UI
+    if (error?.message && (error.message.includes('removeChild') || error.message.includes('insertBefore') || error.message.includes('Node'))) {
+      console.warn("DOM mutation caught (Auto-Translate or Extension), recovering silently...");
+      return { hasError: false, error: null };
+    }
     return { hasError: true, error };
   }
 
