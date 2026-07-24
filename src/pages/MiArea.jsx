@@ -29,21 +29,30 @@ export default function MiArea() {
 
   const { data: areaPersonas = [] } = useQuery({
     queryKey: ["encargados-area", userArea],
-    queryFn: () => supabase.from('perfil_encargado').select('*').eq('area_principal', userArea).order('nombre', { ascending: true }).then(res => res.data),
+    queryFn: () => supabase.from('perfil_encargado').select('*').eq('area_principal', userArea).order('nombre', { ascending: true }).then(res => res.data || []),
   });
 
   const { data: areaRegistros = [] } = useQuery({
     queryKey: ["registros-area", userArea],
-    queryFn: () => supabase.from('registro_trabajo').select('*').eq('area_encargado', userArea).order('created_date', { ascending: false }).limit(500).then(res => res.data),
+    queryFn: () => supabase.from('registro_trabajo').select('*').eq('area_encargado', userArea).order('created_date', { ascending: false }).limit(500).then(res => res.data || []),
   });
 
   // Stats calculation
   const hoy = new Date();
+  const safeAreaPersonas = Array.isArray(areaPersonas) ? areaPersonas : [];
+  const safeAreaRegistros = Array.isArray(areaRegistros) ? areaRegistros : [];
+
+  const isValidDate = (dStr) => {
+    if (!dStr) return false;
+    const d = new Date(dStr);
+    return !isNaN(d.getTime());
+  };
+
   const stats = {
-    total: areaRegistros.length,
-    diario: areaRegistros.filter(r => isSameDay(new Date(r.created_date), hoy)).length,
-    semanal: areaRegistros.filter(r => isSameWeek(new Date(r.created_date), hoy)).length,
-    mensual: areaRegistros.filter(r => isSameMonth(new Date(r.created_date), hoy)).length,
+    total: safeAreaRegistros.length,
+    diario: safeAreaRegistros.filter(r => isValidDate(r.created_date) && isSameDay(new Date(r.created_date), hoy)).length,
+    semanal: safeAreaRegistros.filter(r => isValidDate(r.created_date) && isSameWeek(new Date(r.created_date), hoy)).length,
+    mensual: safeAreaRegistros.filter(r => isValidDate(r.created_date) && isSameMonth(new Date(r.created_date), hoy)).length,
   };
 
   return (

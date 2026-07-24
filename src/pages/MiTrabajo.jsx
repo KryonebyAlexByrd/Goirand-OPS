@@ -92,13 +92,16 @@ function FaseSelector({ tipoFinal, fase, fase_custom, catalogo, onChange }) {
 }
 
 // ── Formulario para agregar / editar una actividad ─────────────────────────
-function WorkItemForm({ draft, setDraft, proyectos, contratistas, catalogo, userArea, onAdd, addLabel = "Agregar" }) {
-  const pActual = proyectos.find(p => p.id === draft.proyecto_id);
-  const masterProjects = proyectos.filter(p => !p.parent_project_id);
-  const subProjects = proyectos.filter(p => p.parent_project_id === draft.proyecto_id);
+function WorkItemForm({ draft, setDraft, proyectos = [], contratistas = [], catalogo = [], userArea, onAdd, addLabel = "Agregar" }) {
+  const safeProyectos = Array.isArray(proyectos) ? proyectos : [];
+  const safeContratistas = Array.isArray(contratistas) ? contratistas : [];
+  const safeCatalogo = Array.isArray(catalogo) ? catalogo : [];
 
-  // Consideramos las partidas del proyecto actual, y si seleccionó subproyecto, las del subproyecto
-  const targetProject = draft.subproyecto_id ? proyectos.find(p => p.id === draft.subproyecto_id) : pActual;
+  const pActual = safeProyectos.find(p => p.id === draft.proyecto_id);
+  const masterProjects = safeProyectos.filter(p => !p.parent_project_id);
+  const subProjects = safeProyectos.filter(p => p.parent_project_id === draft.proyecto_id);
+
+  const targetProject = draft.subproyecto_id ? safeProyectos.find(p => p.id === draft.subproyecto_id) : pActual;
   const partidas = Array.isArray(targetProject?.partidas_cotizacion)
     ? targetProject.partidas_cotizacion.filter(p => p.tipo_trabajo)
     : [];
@@ -302,27 +305,28 @@ export default function MiTrabajo() {
 
   const { data: proyectos = [] } = useQuery({
     queryKey: ["proyectos"],
-    queryFn: () => supabase.from('proyecto').select('*').order('created_date', { ascending: false }).limit(100).then(res => res.data),
+    queryFn: () => supabase.from('proyecto').select('*').order('created_date', { ascending: false }).limit(100).then(res => res.data || []),
   });
 
   const { data: contratistas = [] } = useQuery({
     queryKey: ["contratistas"],
-    queryFn: () => supabase.from('contratista').select('*').order('nombre', { ascending: true }).then(res => res.data),
+    queryFn: () => supabase.from('contratista').select('*').order('nombre', { ascending: true }).then(res => res.data || []),
   });
 
   const { data: catalogo = [] } = useQuery({
     queryKey: ["catalogo"],
-    queryFn: () => supabase.from('catalogo_trabajo').select('*').order('nombre', { ascending: true }).limit(200).then(res => res.data),
+    queryFn: () => supabase.from('catalogo_trabajo').select('*').order('nombre', { ascending: true }).limit(200).then(res => res.data || []),
   });
 
   const { data: misRegistros = [] } = useQuery({
     queryKey: ["mis-registros", user?.id],
-    queryFn: () => supabase.from('registro_trabajo').select('*').match({ created_by_id: user?.id }).order('created_date', { ascending: false }).limit(30).then(res => res.data),
+    queryFn: () => supabase.from('registro_trabajo').select('*').match({ created_by_id: user?.id }).order('created_date', { ascending: false }).limit(30).then(res => res.data || []),
     enabled: !!user?.id,
   });
 
   const hoy = format(new Date(), "yyyy-MM-dd");
-  const registrosHoy = misRegistros.filter(r => r.fecha === hoy);
+  const safeMisRegistros = Array.isArray(misRegistros) ? misRegistros : [];
+  const registrosHoy = safeMisRegistros.filter(r => r.fecha === hoy);
 
   const createMutation = useMutation({
     mutationFn: async (items) => {
