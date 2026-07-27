@@ -38,6 +38,13 @@ export default function Contratistas() {
       }
       delete payload.categoria_custom;
 
+      // Validar duplicados de contratista por nombre
+      const normNombre = (payload.nombre || "").trim().toLowerCase();
+      const duplicate = contratistas.find(c => c.id !== editingId && (c.nombre || "").trim().toLowerCase() === normNombre);
+      if (duplicate) {
+        throw new Error(`El contratista "${payload.nombre}" ya existe en el sistema.`);
+      }
+
       return editingId
         ? supabase.from('contratista').update(payload).eq('id', editingId).select().then(res => {
             if (res.error) throw res.error;
