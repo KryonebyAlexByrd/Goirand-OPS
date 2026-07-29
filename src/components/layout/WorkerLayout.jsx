@@ -1,6 +1,6 @@
 import React from "react";
 import { Outlet, NavLink } from "react-router-dom";
-import { ClipboardList, LayoutDashboard } from "lucide-react";
+import { ClipboardList, LayoutDashboard, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export default function WorkerLayout() {
@@ -44,6 +44,19 @@ export default function WorkerLayout() {
         >
           <LayoutDashboard className="w-6 h-6" />
           <span className="text-[10px] uppercase tracking-wider">Mi Área</span>
+        </NavLink>
+
+        <NavLink
+          to="/mi-cuenta"
+          className={({ isActive }) =>
+            cn(
+              "flex flex-col items-center gap-1.5 p-2 rounded-2xl transition-all w-24",
+              isActive ? "text-orange-500 font-bold" : "text-white/60 hover:text-white/80"
+            )
+          }
+        >
+          <User className="w-6 h-6" />
+          <span className="text-[10px] uppercase tracking-wider">Mi Cuenta</span>
         </NavLink>
       </div>
     </div>

@@ -14,6 +14,7 @@ import { es } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import ProyectoEditDialog from "@/components/proyectos/ProyectoEditDialog";
 import PartidasCotizacion from "@/components/proyectos/PartidasCotizacion";
+import MatrizAvance from "@/components/proyectos/MatrizAvance";
 
 export default function ProyectoDetalle() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -148,6 +149,9 @@ export default function ProyectoDetalle() {
 
           {/* Partidas de cotización */}
           <PartidasCotizacion proyecto={proyecto} isAdmin={isAdmin} />
+
+          {/* Matriz de Avances por Área */}
+          <MatrizAvance partidas={proyecto.partidas_cotizacion || []} />
 
           {/* Registros de trabajo */}
           <Card className="glass-card-dark border-white/10 shadow-2xl rounded-3xl">

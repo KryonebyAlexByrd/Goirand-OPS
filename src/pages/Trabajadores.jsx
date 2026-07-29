@@ -14,20 +14,15 @@ import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { toast } from "sonner";
 
-const AREAS = ["Contratistas", "Recepción", "Cortado", "Tableros", "Armado", "Pulido", "Barnizado", "Empaque", "Entrega", "Otro"];
+const AREAS = ["Contratista", "Corte", "Barniz", "Empaque", "Herraje"];
 const EMPTY_FORM = { nombre: "", area_principal: "Armado", area_custom: "" };
 
 const AREA_COLORS = {
-  "Contratistas": { card: "hover:border-stone-500/30", text: "text-stone-500", bg: "bg-stone-500/10", border: "border-stone-500/20", hoverBg: "group-hover:bg-stone-500" },
-  "Recepción": { card: "hover:border-sky-500/30", text: "text-sky-500", bg: "bg-sky-500/10", border: "border-sky-500/20", hoverBg: "group-hover:bg-sky-500" },
-  "Cortado": { card: "hover:border-orange-500/30", text: "text-orange-500", bg: "bg-orange-500/10", border: "border-orange-500/20", hoverBg: "group-hover:bg-orange-500" },
-  "Tableros": { card: "hover:border-amber-500/30", text: "text-amber-500", bg: "bg-amber-500/10", border: "border-amber-500/20", hoverBg: "group-hover:bg-amber-500" },
-  "Armado": { card: "hover:border-emerald-500/30", text: "text-emerald-500", bg: "bg-emerald-500/10", border: "border-emerald-500/20", hoverBg: "group-hover:bg-emerald-500" },
-  "Pulido": { card: "hover:border-indigo-500/30", text: "text-indigo-500", bg: "bg-indigo-500/10", border: "border-indigo-500/20", hoverBg: "group-hover:bg-indigo-500" },
-  "Barnizado": { card: "hover:border-red-500/30", text: "text-red-500", bg: "bg-red-500/10", border: "border-red-500/20", hoverBg: "group-hover:bg-red-500" },
+  "Contratista": { card: "hover:border-stone-500/30", text: "text-stone-500", bg: "bg-stone-500/10", border: "border-stone-500/20", hoverBg: "group-hover:bg-stone-500" },
+  "Corte": { card: "hover:border-orange-500/30", text: "text-orange-500", bg: "bg-orange-500/10", border: "border-orange-500/20", hoverBg: "group-hover:bg-orange-500" },
+  "Barniz": { card: "hover:border-red-500/30", text: "text-red-500", bg: "bg-red-500/10", border: "border-red-500/20", hoverBg: "group-hover:bg-red-500" },
   "Empaque": { card: "hover:border-purple-500/30", text: "text-purple-500", bg: "bg-purple-500/10", border: "border-purple-500/20", hoverBg: "group-hover:bg-purple-500" },
-  "Entrega": { card: "hover:border-blue-500/30", text: "text-blue-500", bg: "bg-blue-500/10", border: "border-blue-500/20", hoverBg: "group-hover:bg-blue-500" },
-  "Otro": { card: "hover:border-zinc-500/30", text: "text-zinc-500", bg: "bg-zinc-500/10", border: "border-zinc-500/20", hoverBg: "group-hover:bg-zinc-500" }
+  "Herraje": { card: "hover:border-zinc-500/30", text: "text-zinc-500", bg: "bg-zinc-500/10", border: "border-zinc-500/20", hoverBg: "group-hover:bg-zinc-500" }
 };
 
 export default function Trabajadores() {

@@ -21,6 +21,7 @@ import MiTrabajo from '@/pages/MiTrabajo';
 import Login from '@/pages/Login';
 
 import MiArea from '@/pages/MiArea';
+import MiCuenta from '@/pages/MiCuenta';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin, user, isAuthenticated } = useAuth();
@@ -54,6 +55,7 @@ const AuthenticatedApp = () => {
         <Route element={<WorkerLayout />}>
           <Route path="/" element={<MiTrabajo />} />
           <Route path="/mi-area" element={<MiArea />} />
+          <Route path="/mi-cuenta" element={<MiCuenta />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>

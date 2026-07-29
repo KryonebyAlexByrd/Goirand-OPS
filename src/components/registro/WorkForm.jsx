@@ -21,8 +21,7 @@ function generateSafeId() {
 }
 
 const AREAS = [
-  "Contratistas", "Recepción", "Cortado", "Tableros", "Armado",
-  "Pulido", "Barnizado", "Empaque", "Entrega", "Otro"
+  "Contratista", "Corte", "Barniz", "Empaque", "Herraje", "Otro"
 ];
 
 const FASES_POR_TIPO = {

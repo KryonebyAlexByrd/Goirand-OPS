@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Plus, Trash2, Save, Pencil, Clock, AlertTriangle, CheckCircle2, Upload, Loader2, FileText, DollarSign } from "lucide-react";
+import { Plus, Trash2, Save, Pencil, Clock, AlertTriangle, CheckCircle2, Upload, Loader2, FileText, DollarSign, Package } from "lucide-react";
 import { toast } from "sonner";
 import { differenceInDays, parseISO } from "date-fns";
 
@@ -42,16 +42,26 @@ function PartidaMobileCard({ partida, diasRestantes }) {
 
   return (
     <div className="p-3 rounded-xl border border-border/40 bg-muted/20 space-y-2">
-      <div className="flex items-start justify-between gap-2">
+      <div className="flex items-start gap-3">
+        {partida.imagen_url ? (
+          <img src={partida.imagen_url} alt={partida.tipo_trabajo} className="w-12 h-12 rounded-lg object-cover bg-black/50 border border-white/10" />
+        ) : (
+          <div className="w-12 h-12 rounded-lg bg-black/30 border border-white/5 flex items-center justify-center text-xs text-muted-foreground"><Package className="w-4 h-4" /></div>
+        )}
         <div className="flex-1 min-w-0">
-          {partida.codigo && <p className="text-[10px] text-muted-foreground font-mono">{partida.codigo}</p>}
-          <p className="text-sm font-semibold leading-snug">{partida.tipo_trabajo}</p>
+          <div className="flex justify-between gap-2">
+            <div>
+              {partida.codigo && <span className="text-[10px] text-muted-foreground font-mono mr-2">{partida.codigo}</span>}
+              {partida.numero_serie && <span className="text-[10px] text-orange-400 font-mono">SN: {partida.numero_serie}</span>}
+              <p className="text-sm font-semibold leading-snug">{partida.tipo_trabajo}</p>
+            </div>
+            <Badge className={`text-[10px] shrink-0 flex items-center gap-0.5 ${Cfg.className}`}>
+              <Icon className="w-2.5 h-2.5" />
+              {porDia !== null && restante > 0 ? `${porDia}/día` : Cfg.label}
+            </Badge>
+          </div>
           {partida.descripcion && <p className="text-[11px] text-muted-foreground line-clamp-2 mt-0.5">{partida.descripcion}</p>}
         </div>
-        <Badge className={`text-[10px] shrink-0 flex items-center gap-0.5 ${Cfg.className}`}>
-          <Icon className="w-2.5 h-2.5" />
-          {porDia !== null && restante > 0 ? `${porDia}/día` : Cfg.label}
-        </Badge>
       </div>
       <Progress value={pct} className="h-1.5" />
       <div className="flex items-center justify-between text-xs">
@@ -77,8 +87,16 @@ function PartidaDesktopRow({ partida, diasRestantes }) {
 
   return (
     <div className="grid grid-cols-12 gap-2 items-center py-2.5 border-b border-border/30 last:border-0">
-      <div className="col-span-4 min-w-0">
-        {partida.codigo && <p className="text-[10px] text-muted-foreground font-mono">{partida.codigo}</p>}
+      <div className="col-span-1">
+        {partida.imagen_url ? (
+          <img src={partida.imagen_url} alt="img" className="w-10 h-10 rounded-lg object-cover bg-black/50 border border-white/10" />
+        ) : (
+          <div className="w-10 h-10 rounded-lg bg-black/30 border border-white/5 flex items-center justify-center text-muted-foreground"><Package className="w-4 h-4" /></div>
+        )}
+      </div>
+      <div className="col-span-3 min-w-0">
+        {partida.codigo && <span className="text-[10px] text-muted-foreground font-mono mr-2">{partida.codigo}</span>}
+        {partida.numero_serie && <span className="text-[10px] text-orange-400 font-mono">SN: {partida.numero_serie}</span>}
         <p className="text-sm font-medium truncate">{partida.tipo_trabajo}</p>
         {partida.descripcion && <p className="text-[10px] text-muted-foreground line-clamp-1">{partida.descripcion}</p>}
       </div>
@@ -104,29 +122,39 @@ function PartidaDesktopRow({ partida, diasRestantes }) {
 // ── Edit row ─────────────────────────────────────────────────────────────────
 function PartidaEditRow({ partida, onChange, onDelete }) {
   return (
-    <div className="grid grid-cols-12 gap-1.5 items-center py-2 border-b border-border/30 last:border-0">
-      <div className="col-span-12 sm:col-span-1">
-        <Input value={partida.codigo || ""} onChange={e => onChange({ ...partida, codigo: e.target.value })} placeholder="Código" className="h-7 text-xs" />
+    <div className="flex flex-col gap-2 py-3 border-b border-border/30 last:border-0 bg-white/5 p-2 rounded-lg my-1">
+      <div className="grid grid-cols-12 gap-1.5 items-center">
+        <div className="col-span-12 sm:col-span-2">
+          <Input value={partida.codigo || ""} onChange={e => onChange({ ...partida, codigo: e.target.value })} placeholder="Código" className="h-7 text-xs" />
+        </div>
+        <div className="col-span-12 sm:col-span-4">
+          <Input value={partida.tipo_trabajo} onChange={e => onChange({ ...partida, tipo_trabajo: e.target.value })} placeholder="Descripción / tipo" className="h-7 text-xs" />
+        </div>
+        <div className="col-span-12 sm:col-span-2">
+          <Input value={partida.numero_serie || ""} onChange={e => onChange({ ...partida, numero_serie: e.target.value })} placeholder="Nº Serie" className="h-7 text-xs" />
+        </div>
+        <div className="col-span-12 sm:col-span-4">
+          <Input value={partida.imagen_url || ""} onChange={e => onChange({ ...partida, imagen_url: e.target.value })} placeholder="URL Imagen" className="h-7 text-xs" />
+        </div>
       </div>
-      <div className="col-span-12 sm:col-span-3">
-        <Input value={partida.tipo_trabajo} onChange={e => onChange({ ...partida, tipo_trabajo: e.target.value })} placeholder="Descripción / tipo" className="h-7 text-xs" />
-      </div>
-      <div className="col-span-4 sm:col-span-2">
-        <Input type="number" min={0} value={partida.cantidad_total || ""} onFocus={e => e.target.select()} onChange={e => onChange({ ...partida, cantidad_total: parseFloat(e.target.value) || 0 })} placeholder="Total" className="h-7 text-xs text-center" />
-      </div>
-      <div className="col-span-4 sm:col-span-2">
-        <Input type="number" min={0} value={partida.cantidad_realizada || ""} onFocus={e => e.target.select()} onChange={e => onChange({ ...partida, cantidad_realizada: parseFloat(e.target.value) || 0 })} placeholder="Hecho" className="h-7 text-xs text-center" />
-      </div>
-      <div className="col-span-3 sm:col-span-1">
-        <Input value={partida.unidad || ""} onChange={e => onChange({ ...partida, unidad: e.target.value })} placeholder="pz" className="h-7 text-xs text-center" />
-      </div>
-      <div className="col-span-5 sm:col-span-2">
-        <Input type="number" min={0} value={partida.precio_unitario || ""} onFocus={e => e.target.select()} onChange={e => onChange({ ...partida, precio_unitario: parseFloat(e.target.value) || 0, precio_total: (parseFloat(e.target.value) || 0) * (partida.cantidad_total || 0) })} placeholder="P.U." className="h-7 text-xs text-center" />
-      </div>
-      <div className="col-span-1 flex justify-end">
-        <button onClick={onDelete} className="text-destructive hover:text-destructive/70 transition-colors p-1">
-          <Trash2 className="w-3.5 h-3.5" />
-        </button>
+      <div className="grid grid-cols-12 gap-1.5 items-center mt-1">
+        <div className="col-span-3 sm:col-span-2">
+          <Input type="number" min={0} value={partida.cantidad_total || ""} onFocus={e => e.target.select()} onChange={e => onChange({ ...partida, cantidad_total: parseFloat(e.target.value) || 0 })} placeholder="Total" className="h-7 text-xs text-center" />
+        </div>
+        <div className="col-span-3 sm:col-span-2">
+          <Input type="number" min={0} value={partida.cantidad_realizada || ""} onFocus={e => e.target.select()} onChange={e => onChange({ ...partida, cantidad_realizada: parseFloat(e.target.value) || 0 })} placeholder="Hecho" className="h-7 text-xs text-center" />
+        </div>
+        <div className="col-span-2 sm:col-span-2">
+          <Input value={partida.unidad || ""} onChange={e => onChange({ ...partida, unidad: e.target.value })} placeholder="pz" className="h-7 text-xs text-center" />
+        </div>
+        <div className="col-span-3 sm:col-span-3">
+          <Input type="number" min={0} value={partida.precio_unitario || ""} onFocus={e => e.target.select()} onChange={e => onChange({ ...partida, precio_unitario: parseFloat(e.target.value) || 0, precio_total: (parseFloat(e.target.value) || 0) * (partida.cantidad_total || 0) })} placeholder="P.U." className="h-7 text-xs text-center" />
+        </div>
+        <div className="col-span-1 flex justify-end ml-auto">
+          <button onClick={onDelete} className="text-destructive hover:text-destructive/70 transition-colors p-1">
+            <Trash2 className="w-4 h-4" />
+          </button>
+        </div>
       </div>
     </div>
   );

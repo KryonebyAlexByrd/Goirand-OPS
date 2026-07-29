@@ -19,7 +19,6 @@ import { cn } from "@/lib/utils";
 
 const AREA_COLORS = {
   "Contratistas": "bg-stone-500 text-stone-950 border-stone-500",
-  "Recepción": "bg-sky-500 text-sky-950 border-sky-500",
   "Cortado": "bg-orange-500 text-orange-950 border-orange-500",
   "Tableros": "bg-amber-500 text-amber-950 border-amber-500",
   "Armado": "bg-emerald-500 text-emerald-950 border-emerald-500",

@@ -35,7 +35,7 @@ const DEFAULT_FORM = {
   monto_total: 0,
   monto_incluye_iva: true,
   fabricas_asignadas: [],
-  fase_actual: "1. Recepción de Proyecto",
+  fase_actual: "1. Contratista",
   porcentaje_avance: 0,
   contratistas_asignados: [],
   pagos_programados: [],

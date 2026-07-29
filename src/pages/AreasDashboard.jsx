@@ -9,19 +9,14 @@ import { LayoutDashboard, Users, ChevronLeft, ArrowRight, ClipboardList, CheckCi
 import { format, isSameDay, isSameWeek, isSameMonth } from "date-fns";
 import { es } from "date-fns/locale";
 
-const AREAS = ["Contratistas", "Recepción", "Cortado", "Tableros", "Armado", "Pulido", "Barnizado", "Empaque", "Entrega", "Otro"];
+const AREAS = ["Contratista", "Corte", "Barniz", "Empaque", "Herraje"];
 
 const AREA_COLORS = {
-  "Contratistas": "bg-stone-500/10 text-stone-600 border-stone-200",
-  "Recepción": "bg-sky-500/10 text-sky-600 border-sky-200",
-  "Cortado": "bg-orange-500/10 text-orange-600 border-orange-200",
-  "Tableros": "bg-amber-500/10 text-amber-600 border-amber-200",
-  "Armado": "bg-emerald-500/10 text-emerald-600 border-emerald-200",
-  "Pulido": "bg-indigo-500/10 text-indigo-600 border-indigo-200",
-  "Barnizado": "bg-red-500/10 text-red-600 border-red-200",
+  "Contratista": "bg-stone-500/10 text-stone-600 border-stone-200",
+  "Corte": "bg-orange-500/10 text-orange-600 border-orange-200",
+  "Barniz": "bg-red-500/10 text-red-600 border-red-200",
   "Empaque": "bg-purple-500/10 text-purple-600 border-purple-200",
-  "Entrega": "bg-blue-500/10 text-blue-600 border-blue-200",
-  "Otro": "bg-gray-500/10 text-gray-600 border-gray-200",
+  "Herraje": "bg-zinc-500/10 text-zinc-600 border-zinc-200",
 };
 
 export default function AreasDashboard() {

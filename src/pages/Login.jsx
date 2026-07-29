@@ -13,15 +13,11 @@ import { toast } from 'sonner';
 
 const AREAS = [
   "Admin",
-  "Contratistas",
-  "Recepción",
-  "Cortado",
-  "Tableros",
-  "Armado",
-  "Pulido",
-  "Barnizado",
+  "Contratista",
+  "Corte",
+  "Barniz",
   "Empaque",
-  "Entrega"
+  "Herraje"
 ];
 
 export default function Login() {
@@ -32,6 +28,8 @@ export default function Login() {
   
   // Login State
   const [selectedProfileId, setSelectedProfileId] = useState('');
+  const [step, setStep] = useState('select'); // 'select', 'enter_password', 'create_password'
+  const [passwordInput, setPasswordInput] = useState('');
 
   // Register State
   const [regName, setRegName] = useState('');
@@ -51,27 +49,67 @@ export default function Login() {
     return <Navigate to="/" replace />;
   }
 
-  const handleLogin = async (e) => {
+  const handleNextStep = async (e) => {
     e.preventDefault();
     if (!selectedProfileId) {
       setError("Por favor selecciona tu usuario.");
       return;
     }
-    
     const perfil = perfiles.find(p => p.id === selectedProfileId);
-    if (perfil) {
-      if (perfil.area_principal === "Admin") {
-        const pass = window.prompt("Introduce la contraseña de Administrador:");
-        if (pass !== "goirandreal") {
+    if (!perfil) {
+      setError("Usuario no encontrado.");
+      return;
+    }
+    // Check if password exists
+    if (!perfil.password_cifrada) {
+      // If they have no password set, let them in directly.
+      // They can configure their password later in 'Mi Cuenta'.
+      loginLocal(perfil);
+      toast.success(`¡Bienvenido, ${perfil.nombre}!`);
+    } else {
+      setStep('enter_password');
+    }
+  };
+
+  const handleLoginSubmit = async (e) => {
+    e.preventDefault();
+    setError(null);
+    const perfil = perfiles.find(p => p.id === selectedProfileId);
+    
+    if (step === 'create_password') {
+      if (!passwordInput || passwordInput.length < 4) {
+        setError("La contraseña debe tener al menos 4 caracteres.");
+        return;
+      }
+      setLoading(true);
+      const { error: updateError } = await supabase
+        .from('perfil_encargado')
+        .update({ password_cifrada: passwordInput })
+        .eq('id', perfil.id);
+      setLoading(false);
+      
+      if (updateError) {
+        setError("Error al guardar la contraseña.");
+        return;
+      }
+      perfil.password_cifrada = passwordInput;
+      loginLocal(perfil);
+      toast.success(`¡Contraseña creada! Bienvenido, ${perfil.nombre}.`);
+    } else if (step === 'enter_password') {
+      if (perfil.area_principal === "Admin" && !perfil.password_cifrada) {
+        // Fallback for admin if no DB password is set yet
+        if (passwordInput !== "goirandreal") {
+           setError("Contraseña incorrecta.");
+           return;
+        }
+      } else {
+        if (passwordInput !== perfil.password_cifrada) {
           setError("Contraseña incorrecta.");
           return;
         }
       }
-      
       loginLocal(perfil);
       toast.success(`¡Bienvenido de vuelta, ${perfil.nombre}!`);
-    } else {
-      setError("Usuario no encontrado.");
     }
   };
 
@@ -225,27 +263,82 @@ export default function Login() {
             </TabsList>
 
             <TabsContent value="login" className="mt-0">
-              <form onSubmit={handleLogin} className="space-y-4">
-                <div className="space-y-2">
-                  <Label className="text-white/90 ml-2 font-semibold">¿Quién eres?</Label>
-                  <Select value={selectedProfileId} onValueChange={setSelectedProfileId} required>
-                    <SelectTrigger className="glass-input rounded-full h-12 px-5 ring-offset-orange-600 focus:ring-white/50">
-                      <SelectValue placeholder="Selecciona tu nombre..." />
-                    </SelectTrigger>
-                    <SelectContent className="bg-white border-none text-zinc-900 rounded-xl shadow-xl max-h-[300px]">
-                      {perfiles.map(p => (
-                        <SelectItem key={p.id} value={p.id} className="focus:bg-orange-100 focus:text-orange-700 rounded-lg cursor-pointer font-medium py-3">
-                          {p.nombre} <span className="text-zinc-500 text-sm ml-2">({p.area_principal})</span>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                {error && <p className="text-xs text-red-200 font-medium text-center bg-red-900/40 p-2 rounded-lg">{error}</p>}
-                <Button type="submit" className="w-full bg-white text-orange-600 hover:bg-zinc-100 rounded-full h-12 text-lg font-black shadow-xl border-0 mt-4 transition-transform hover:scale-[1.02]" disabled={loading}>
-                  Entrar al sistema
-                </Button>
-              </form>
+              {step === 'select' && (
+                <form onSubmit={handleNextStep} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label className="text-white/90 ml-2 font-semibold">¿Quién eres?</Label>
+                    <Select value={selectedProfileId} onValueChange={setSelectedProfileId} required>
+                      <SelectTrigger className="glass-input rounded-full h-12 px-5 ring-offset-orange-600 focus:ring-white/50">
+                        <SelectValue placeholder="Selecciona tu nombre..." />
+                      </SelectTrigger>
+                      <SelectContent className="bg-white border-none text-zinc-900 rounded-xl shadow-xl max-h-[300px]">
+                        {perfiles.map(p => (
+                          <SelectItem key={p.id} value={p.id} className="focus:bg-orange-100 focus:text-orange-700 rounded-lg cursor-pointer font-medium py-3">
+                            {p.nombre} <span className="text-zinc-500 text-sm ml-2">({p.area_principal})</span>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  {error && <p className="text-xs text-red-200 font-medium text-center bg-red-900/40 p-2 rounded-lg">{error}</p>}
+                  <Button type="submit" className="w-full bg-white text-orange-600 hover:bg-zinc-100 rounded-full h-12 text-lg font-black shadow-xl border-0 mt-4 transition-transform hover:scale-[1.02]" disabled={loading}>
+                    Siguiente
+                  </Button>
+                </form>
+              )}
+
+              {step === 'create_password' && (
+                <form onSubmit={handleLoginSubmit} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label className="text-white/90 ml-2 font-semibold">Crea tu contraseña secreta</Label>
+                    <p className="text-xs text-orange-200 ml-2 mb-2">Parece que es tu primera vez entrando. Por favor crea una contraseña para proteger tu usuario.</p>
+                    <Input 
+                      type="password" 
+                      placeholder="Mínimo 4 caracteres..." 
+                      value={passwordInput} 
+                      onChange={e => setPasswordInput(e.target.value)} 
+                      required 
+                      className="glass-input rounded-full h-12 px-5 ring-offset-orange-600 focus-visible:ring-white/50" 
+                      autoFocus
+                    />
+                  </div>
+                  {error && <p className="text-xs text-red-200 font-medium text-center bg-red-900/40 p-2 rounded-lg">{error}</p>}
+                  <div className="flex gap-2 mt-4">
+                    <Button type="button" variant="ghost" onClick={() => { setStep('select'); setPasswordInput(''); setError(null); }} className="w-1/3 text-white hover:bg-white/10 rounded-full h-12">
+                      Atrás
+                    </Button>
+                    <Button type="submit" className="w-2/3 bg-white text-orange-600 hover:bg-zinc-100 rounded-full h-12 text-lg font-black shadow-xl border-0 transition-transform hover:scale-[1.02]" disabled={loading}>
+                      {loading ? <Loader2 className="w-5 h-5 animate-spin text-orange-600" /> : "Guardar y Entrar"}
+                    </Button>
+                  </div>
+                </form>
+              )}
+
+              {step === 'enter_password' && (
+                <form onSubmit={handleLoginSubmit} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label className="text-white/90 ml-2 font-semibold">Ingresa tu contraseña</Label>
+                    <Input 
+                      type="password" 
+                      placeholder="Tu contraseña secreta..." 
+                      value={passwordInput} 
+                      onChange={e => setPasswordInput(e.target.value)} 
+                      required 
+                      className="glass-input rounded-full h-12 px-5 ring-offset-orange-600 focus-visible:ring-white/50" 
+                      autoFocus
+                    />
+                  </div>
+                  {error && <p className="text-xs text-red-200 font-medium text-center bg-red-900/40 p-2 rounded-lg">{error}</p>}
+                  <div className="flex gap-2 mt-4">
+                    <Button type="button" variant="ghost" onClick={() => { setStep('select'); setPasswordInput(''); setError(null); }} className="w-1/3 text-white hover:bg-white/10 rounded-full h-12">
+                      Atrás
+                    </Button>
+                    <Button type="submit" className="w-2/3 bg-white text-orange-600 hover:bg-zinc-100 rounded-full h-12 text-lg font-black shadow-xl border-0 transition-transform hover:scale-[1.02]" disabled={loading}>
+                      {loading ? <Loader2 className="w-5 h-5 animate-spin text-orange-600" /> : "Entrar al sistema"}
+                    </Button>
+                  </div>
+                </form>
+              )}
             </TabsContent>
 
             <TabsContent value="register" className="mt-0">

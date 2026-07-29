@@ -11,7 +11,6 @@ import { useAuth } from "@/lib/AuthContext";
 
 const AREA_COLORS = {
   "Contratistas": "bg-stone-500/10 text-stone-600 border-stone-200",
-  "Recepción": "bg-sky-500/10 text-sky-600 border-sky-200",
   "Cortado": "bg-orange-500/10 text-orange-600 border-orange-200",
   "Tableros": "bg-amber-500/10 text-amber-600 border-amber-200",
   "Armado": "bg-emerald-500/10 text-emerald-600 border-emerald-200",

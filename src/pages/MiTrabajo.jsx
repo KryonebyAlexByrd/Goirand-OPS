@@ -26,15 +26,11 @@ function generateSafeId() {
 
 // ── Fases hardcodeadas según solicitud ───────────────────────────────────────
 const FASES_NUEVAS = [
-  "Armado",
-  "Barnizado",
-  "Cortado",
+  "Contratista",
+  "Corte",
+  "Barniz",
   "Empaque",
-  "Entrega",
-  "Pulido",
-  "Recepción",
-  "Tableros",
-  "Contratistas"
+  "Herraje"
 ];
 
 function getFases(tipoTrabajo, catalogo = []) {
@@ -106,7 +102,7 @@ function WorkItemForm({ draft, setDraft, proyectos = [], contratistas = [], cata
     ? targetProject.partidas_cotizacion.filter(p => p.tipo_trabajo)
     : [];
 
-  const isContratistas = userArea === "Contratistas" || userArea === "Recepción";
+  const isContratistas = userArea === "Contratista" || userArea === "Contratistas";
 
   const isCustomMode = draft.tipo_libre || partidas.length === 0;
   const tipoFinal = isCustomMode ? draft.tipo_custom : draft.tipo_trabajo;
@@ -393,7 +389,7 @@ export default function MiTrabajo() {
           finalProjectId,
           tipoFinal,
           item.cantidad || 1,
-          faseFinal === "Finalizado"
+          faseFinal
         );
       }
     },
