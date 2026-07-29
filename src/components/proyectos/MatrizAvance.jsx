@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Package, CheckCircle2 } from "lucide-react";
 
-const AREAS = ["Contratista", "Corte", "Barniz", "Empaque", "Herraje"];
+const AREAS = ["Contratista", "Corte", "Barnizado", "Empaque", "Herraje"];
 
 export default function MatrizAvance({ partidas = [] }) {
   if (!partidas || partidas.length === 0) {

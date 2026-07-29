@@ -21,21 +21,21 @@ function generateSafeId() {
 }
 
 const AREAS = [
-  "Contratista", "Corte", "Barniz", "Empaque", "Herraje", "Otro"
+  "Contratista", "Corte", "Barnizado", "Empaque", "Herraje", "Otro"
 ];
 
 const FASES_POR_TIPO = {
-  "Silla Beatriz": ["Contratista", "Barniz", "Tapicería"],
-  "Poltrona":      ["Contratista", "Barniz", "Tapicería"],
-  "Sofás":         ["Contratista", "Barniz", "Tapicería"],
-  "Consola":       ["Habilitación", "Armado", "Pulido", "Barniz", "Empaque"],
+  "Silla Beatriz": ["Contratista", "Barnizado", "Tapicería"],
+  "Poltrona":      ["Contratista", "Barnizado", "Tapicería"],
+  "Sofás":         ["Contratista", "Barnizado", "Tapicería"],
+  "Consola":       ["Habilitación", "Armado", "Pulido", "Barnizado", "Empaque"],
   "Espejo":        ["Habilitación", "Armado", "Tapicería", "Herraje", "Empaque"],
-  "Base de Cama":  ["Habilitación", "Corte", "Armado", "Pulido", "Barniz"],
-  "Toallado":      ["Habilitación", "Armado", "Pulido", "Barniz", "Empaque"],
-  "Mesa":          ["Contratista", "Armado", "Barniz", "Mármol"],
+  "Base de Cama":  ["Habilitación", "Corte", "Armado", "Pulido", "Barnizado"],
+  "Toallado":      ["Habilitación", "Armado", "Pulido", "Barnizado", "Empaque"],
+  "Mesa":          ["Contratista", "Armado", "Barnizado", "Mármol"],
 };
 const FASES_DEFAULT = [
-  "Habilitación", "Corte", "Armado", "Pulido", "Barniz",
+  "Habilitación", "Corte", "Armado", "Pulido", "Barnizado",
   "Tapicería", "Herrería", "Herraje", "Calidad", "Contratista", "Empaque", "Mármol",
 ];
 
@@ -76,6 +76,7 @@ export default function WorkForm({ proyectos, trabajadores, contratistas = [], o
     encargado_nombre: "",
     es_contratista: false,
     contratista_id: "",
+    es_finalizado: false,
   });
 
   const { data: catalogo = [] } = useQuery({
@@ -133,6 +134,7 @@ export default function WorkForm({ proyectos, trabajadores, contratistas = [], o
         finalProjectId,
         data.tipo_trabajo,
         data.cantidad || 1,
+        data.fase || data.area,
         data.es_finalizado || false
       );
 
@@ -356,30 +358,40 @@ export default function WorkForm({ proyectos, trabajadores, contratistas = [], o
 
             {/* Fase — aparece cuando hay tipo de trabajo */}
             {tipoTrabajoFinal && (
-              <div className="space-y-2">
-                <Label>Fase *</Label>
-                <Select value={form.fase} onValueChange={(v) => setForm(f => ({ ...f, fase: v, fase_custom: v !== "__nueva" ? "" : f.fase_custom }))}>
-                  <SelectTrigger className="glass-input rounded-full px-5"><SelectValue placeholder="Seleccionar fase" /></SelectTrigger>
-                  <SelectContent className="glass-card-dark text-white border-white/10">
-                    {fases.map(f => (
-                      <SelectItem key={f} value={f}>
-                        {f === "Finalizado" ? "✅ Finalizado — pieza terminada" : f}
-                      </SelectItem>
-                    ))}
-                    <SelectItem value="__nueva">✏️ Nueva fase...</SelectItem>
-                  </SelectContent>
-                </Select>
-                {form.fase === "__nueva" && (
-                  <Input
-                    value={form.fase_custom}
-                    onChange={(e) => setForm(f => ({ ...f, fase_custom: e.target.value }))}
-                    placeholder="Nombre de la nueva fase..."
-                    className="glass-input rounded-full px-5"
+              <div className="space-y-3">
+                <div className="space-y-2">
+                  <Label>Fase *</Label>
+                  <Select value={form.fase} onValueChange={(v) => setForm(f => ({ ...f, fase: v, fase_custom: v !== "__nueva" ? "" : f.fase_custom }))}>
+                    <SelectTrigger className="glass-input rounded-full px-5"><SelectValue placeholder="Seleccionar fase" /></SelectTrigger>
+                    <SelectContent className="glass-card-dark text-white border-white/10">
+                      {fases.filter(f => f !== "Finalizado").map(f => (
+                        <SelectItem key={f} value={f}>{f}</SelectItem>
+                      ))}
+                      <SelectItem value="__nueva">✏️ Nueva fase...</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {form.fase === "__nueva" && (
+                    <Input
+                      value={form.fase_custom}
+                      onChange={(e) => setForm(f => ({ ...f, fase_custom: e.target.value }))}
+                      placeholder="Nombre de la nueva fase..."
+                      className="glass-input rounded-full px-5"
+                    />
+                  )}
+                </div>
+
+                <div className="flex items-center space-x-2 bg-emerald-500/10 border border-emerald-500/20 p-3 rounded-xl mt-2">
+                  <input 
+                    type="checkbox" 
+                    id="es_finalizado" 
+                    checked={form.es_finalizado}
+                    onChange={(e) => setForm(f => ({ ...f, es_finalizado: e.target.checked }))}
+                    className="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 bg-white/5 border-white/10"
                   />
-                )}
-                {form.fase === "Finalizado" && (
-                  <p className="text-[11px] text-emerald-500 font-medium">✅ Se marcará como pieza terminada.</p>
-                )}
+                  <label htmlFor="es_finalizado" className="text-sm font-medium text-emerald-400 cursor-pointer">
+                    ✅ Esta pieza ya está 100% terminada
+                  </label>
+                </div>
               </div>
             )}
 

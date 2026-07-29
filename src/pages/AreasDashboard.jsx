@@ -9,12 +9,12 @@ import { LayoutDashboard, Users, ChevronLeft, ArrowRight, ClipboardList, CheckCi
 import { format, isSameDay, isSameWeek, isSameMonth } from "date-fns";
 import { es } from "date-fns/locale";
 
-const AREAS = ["Contratista", "Corte", "Barniz", "Empaque", "Herraje"];
+const AREAS = ["Contratista", "Corte", "Barnizado", "Empaque", "Herraje"];
 
 const AREA_COLORS = {
   "Contratista": "bg-stone-500/10 text-stone-600 border-stone-200",
   "Corte": "bg-orange-500/10 text-orange-600 border-orange-200",
-  "Barniz": "bg-red-500/10 text-red-600 border-red-200",
+  "Barnizado": "bg-red-500/10 text-red-600 border-red-200",
   "Empaque": "bg-purple-500/10 text-purple-600 border-purple-200",
   "Herraje": "bg-zinc-500/10 text-zinc-600 border-zinc-200",
 };

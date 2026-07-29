@@ -15,7 +15,7 @@ import { Lock, History, Save, LogOut, Loader2, UserCircle } from "lucide-react";
 import StatusBadge from "@/components/shared/StatusBadge";
 
 const AREAS = [
-  "Contratista", "Corte", "Barniz", "Empaque", "Herraje", "Otro"
+  "Contratista", "Corte", "Barnizado", "Empaque", "Herraje", "Otro"
 ];
 
 export default function MiCuenta() {

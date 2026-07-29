@@ -1,6 +1,6 @@
 import { supabase } from "@/api/supabaseClient";
 
-export async function updateProjectProgress(proyecto_id, tipo_trabajo, cantidad, fase) {
+export async function updateProjectProgress(proyecto_id, tipo_trabajo, cantidad, area, isFinalizado) {
   if (!proyecto_id || !tipo_trabajo) return;
 
   const cantidadNum = parseInt(cantidad, 10) || 0;
@@ -43,22 +43,14 @@ export async function updateProjectProgress(proyecto_id, tipo_trabajo, cantidad,
         
         let newAvanceAreas = { ...(pt.avance_areas || {}) };
         
-        // Always increment the specific area
-        if (fase) {
-           newAvanceAreas[fase] = (newAvanceAreas[fase] || 0) + cantidadNum;
+        // Increment specific area
+        if (area) {
+           newAvanceAreas[area] = (newAvanceAreas[area] || 0) + cantidadNum;
         }
 
-        // Only increment the global "cantidad_realizada" if the phase is "Finalizado"
-        // Wait! Previously any area incremented the global done. Let's ask the user?
-        // The prompt says "Cuando un encargado... registre... va a aparecer un puntito en verde sobre esa columna. Cuando aparezca con finalizado, entonces va a aparecer verde completamente".
-        // This implies "Finalizado" is the end of the line and means the piece is 100% complete.
-        // Let's increment global if fase === "Finalizado". Wait, if we only increment global when "Finalizado", the progress bar only moves at the end. That makes sense for manufacturing.
-        // But the previous code just incremented it for any phase. 
-        // Let's keep incrementing global for "Finalizado" only, or keep the old behavior?
-        // Old behavior was: currentDone + cantidadNum.
-        // If we change it to only increment on Finalizado, the progress bar will be much more accurate.
+        // Only increment the global "cantidad_realizada" if isFinalizado is true
         let newDone = currentDone;
-        if (fase === "Finalizado") {
+        if (isFinalizado) {
             newDone += cantidadNum;
         }
 
@@ -74,13 +66,13 @@ export async function updateProjectProgress(proyecto_id, tipo_trabajo, cantidad,
     // 3. Si no existía la partida, la agregamos al proyecto
     if (!exists) {
       let newAvanceAreas = {};
-      if (fase) {
-          newAvanceAreas[fase] = cantidadNum;
+      if (area) {
+          newAvanceAreas[area] = cantidadNum;
       }
       partidas.push({
         tipo_trabajo: tipo_trabajo.trim(),
         cantidad_total: cantidadNum,
-        cantidad_realizada: fase === "Finalizado" ? cantidadNum : 0,
+        cantidad_realizada: isFinalizado ? cantidadNum : 0,
         avance_areas: newAvanceAreas,
         unidad: "pz",
         precio_unitario: 0,

@@ -14,13 +14,13 @@ import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { toast } from "sonner";
 
-const AREAS = ["Contratista", "Corte", "Barniz", "Empaque", "Herraje"];
+const AREAS = ["Contratista", "Corte", "Barnizado", "Empaque", "Herraje"];
 const EMPTY_FORM = { nombre: "", area_principal: "Armado", area_custom: "" };
 
 const AREA_COLORS = {
   "Contratista": { card: "hover:border-stone-500/30", text: "text-stone-500", bg: "bg-stone-500/10", border: "border-stone-500/20", hoverBg: "group-hover:bg-stone-500" },
   "Corte": { card: "hover:border-orange-500/30", text: "text-orange-500", bg: "bg-orange-500/10", border: "border-orange-500/20", hoverBg: "group-hover:bg-orange-500" },
-  "Barniz": { card: "hover:border-red-500/30", text: "text-red-500", bg: "bg-red-500/10", border: "border-red-500/20", hoverBg: "group-hover:bg-red-500" },
+  "Barnizado": { card: "hover:border-red-500/30", text: "text-red-500", bg: "bg-red-500/10", border: "border-red-500/20", hoverBg: "group-hover:bg-red-500" },
   "Empaque": { card: "hover:border-purple-500/30", text: "text-purple-500", bg: "bg-purple-500/10", border: "border-purple-500/20", hoverBg: "group-hover:bg-purple-500" },
   "Herraje": { card: "hover:border-zinc-500/30", text: "text-zinc-500", bg: "bg-zinc-500/10", border: "border-zinc-500/20", hoverBg: "group-hover:bg-zinc-500" }
 };

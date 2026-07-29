@@ -28,7 +28,7 @@ function generateSafeId() {
 const FASES_NUEVAS = [
   "Contratista",
   "Corte",
-  "Barniz",
+  "Barnizado",
   "Empaque",
   "Herraje"
 ];

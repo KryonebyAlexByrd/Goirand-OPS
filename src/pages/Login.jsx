@@ -15,7 +15,7 @@ const AREAS = [
   "Admin",
   "Contratista",
   "Corte",
-  "Barniz",
+  "Barnizado",
   "Empaque",
   "Herraje"
 ];
