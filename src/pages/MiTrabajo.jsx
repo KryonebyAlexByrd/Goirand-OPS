@@ -209,24 +209,47 @@ function WorkItemForm({ draft, setDraft, proyectos = [], contratistas = [], cata
       <div className="space-y-1.5">
         <Label className="text-xs font-medium text-white/90">Producto / Trabajo *</Label>
         {partidas.length > 0 && !draft.tipo_libre ? (
-          <Select
-            value={draft.tipo_trabajo}
-            onValueChange={(v) => {
-              if (v === "__otro") {
-                setDraft(d => ({ ...d, tipo_trabajo: "", tipo_libre: true, tipo_custom: "", fase: "", fase_custom: "" }));
-              } else {
-                setDraft(d => ({ ...d, tipo_trabajo: v, tipo_libre: false, tipo_custom: "", fase: "", fase_custom: "" }));
-              }
-            }}
-          >
-            <SelectTrigger className="glass-input rounded-full h-10 px-4 ring-offset-orange-600 focus:ring-white/50"><SelectValue placeholder="Seleccionar producto" /></SelectTrigger>
-            <SelectContent className="bg-zinc-900 border-zinc-800 text-white rounded-xl shadow-xl">
-              {partidas.map((p, i) => (
-                <SelectItem key={i} value={p.tipo_trabajo} className="focus:bg-orange-600/20 focus:text-orange-500 rounded-lg cursor-pointer">{p.tipo_trabajo} ({p.cantidad} pzs)</SelectItem>
-              ))}
-              <SelectItem value="__otro" className="focus:bg-orange-600/20 focus:text-orange-500 rounded-lg cursor-pointer">✏️ Escribir manualmente...</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="flex flex-col gap-2 max-h-[350px] overflow-y-auto pr-2">
+            {partidas.map((p, i) => {
+              const restante = (p.cantidad_total || 0) - (p.cantidad_realizada || 0);
+              const isSelected = draft.tipo_trabajo === p.tipo_trabajo;
+              return (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => setDraft(d => ({ ...d, tipo_trabajo: p.tipo_trabajo, tipo_libre: false, tipo_custom: "", fase: "", fase_custom: "" }))}
+                  className={`flex items-center gap-3 p-2 rounded-xl border text-left transition-all ${isSelected ? "bg-orange-500/20 border-orange-500 shadow-md ring-1 ring-orange-500" : "bg-white/5 border-white/10 hover:bg-white/10"}`}
+                >
+                  {p.imagen_url ? (
+                    <img src={p.imagen_url} alt="img" className="w-12 h-12 rounded-lg object-cover bg-black/50 border border-white/10 shrink-0" />
+                  ) : (
+                    <div className="w-12 h-12 rounded-lg bg-black/30 border border-white/5 flex items-center justify-center text-muted-foreground shrink-0"><Package className="w-5 h-5" /></div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    {p.codigo && <span className="text-[10px] text-muted-foreground font-mono block">{p.codigo}</span>}
+                    <p className="text-sm font-medium truncate text-white leading-tight">{p.tipo_trabajo}</p>
+                    <div className="text-xs mt-1">
+                      {p.cantidad_total > 0 ? (
+                        <span className={restante > 0 ? "text-amber-400" : "text-emerald-400 font-medium"}>
+                          {restante > 0 ? `${restante} restantes de ${p.cantidad_total}` : "Completado"}
+                        </span>
+                      ) : (
+                        <span className="text-muted-foreground">Sin límite</span>
+                      )}
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
+            <button
+              type="button"
+              onClick={() => setDraft(d => ({ ...d, tipo_trabajo: "", tipo_libre: true, tipo_custom: "", fase: "", fase_custom: "" }))}
+              className={`flex items-center gap-3 p-3 rounded-xl border text-left transition-all bg-white/5 border-white/10 hover:bg-white/10`}
+            >
+              <div className="w-10 h-10 rounded-lg bg-black/30 border border-white/5 flex items-center justify-center text-muted-foreground shrink-0"><Plus className="w-5 h-5" /></div>
+              <span className="text-sm font-medium text-white">Otro tipo de trabajo (escribir manualmente)...</span>
+            </button>
+          </div>
         ) : (
           <div className="flex gap-2">
             <Input
