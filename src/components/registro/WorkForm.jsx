@@ -327,31 +327,57 @@ export default function WorkForm({ proyectos, trabajadores, contratistas = [], o
             </div>
 
             {/* Tipo de trabajo */}
-            <div className="space-y-2">
-              <Label>Tipo de Trabajo *</Label>
+            <div className="space-y-2 md:col-span-2">
+              <Label>Tipo de Trabajo (Artículo) *</Label>
               {partidasProyecto.length > 0 ? (
-                <Select value={form.tipo_trabajo} onValueChange={(v) => setForm(f => ({ ...f, tipo_trabajo: v === "__otro" ? "" : v, fase: "", fase_custom: "" }))}>
-                  <SelectTrigger className="glass-input rounded-full px-5"><SelectValue placeholder="Seleccionar tipo de trabajo" /></SelectTrigger>
-                  <SelectContent className="glass-card-dark text-white border-white/10">
-                    {partidasProyecto.map((p, i) => {
-                      const restante = (p.cantidad_total || 0) - (p.cantidad_realizada || 0);
-                      return (
-                        <SelectItem key={i} value={p.tipo_trabajo}>
-                          {p.tipo_trabajo}
-                          {p.cantidad_total > 0 && <span className="text-white/50 ml-2 text-xs">({restante > 0 ? `${restante} restantes` : "Completo"})</span>}
-                        </SelectItem>
-                      );
-                    })}
-                    <SelectItem value="__otro">✏️ Otro tipo...</SelectItem>
-                  </SelectContent>
-                </Select>
+                <div className="flex flex-col gap-2 max-h-[350px] overflow-y-auto pr-2">
+                  {partidasProyecto.map((p, i) => {
+                    const restante = (p.cantidad_total || 0) - (p.cantidad_realizada || 0);
+                    const isSelected = form.tipo_trabajo === p.tipo_trabajo;
+                    return (
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={() => setForm(f => ({ ...f, tipo_trabajo: p.tipo_trabajo, fase: "", fase_custom: "" }))}
+                        className={`flex items-center gap-3 p-2 rounded-xl border text-left transition-all ${isSelected ? "bg-orange-500/20 border-orange-500 shadow-md ring-1 ring-orange-500" : "bg-white/5 border-white/10 hover:bg-white/10"}`}
+                      >
+                        {p.imagen_url ? (
+                          <img src={p.imagen_url} alt="img" className="w-12 h-12 rounded-lg object-cover bg-black/50 border border-white/10 shrink-0" />
+                        ) : (
+                          <div className="w-12 h-12 rounded-lg bg-black/30 border border-white/5 flex items-center justify-center text-muted-foreground shrink-0"><Package className="w-5 h-5" /></div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          {p.codigo && <span className="text-[10px] text-muted-foreground font-mono block">{p.codigo}</span>}
+                          <p className="text-sm font-medium truncate text-white leading-tight">{p.tipo_trabajo}</p>
+                          <div className="text-xs mt-1">
+                            {p.cantidad_total > 0 ? (
+                              <span className={restante > 0 ? "text-amber-400" : "text-emerald-400 font-medium"}>
+                                {restante > 0 ? `${restante} restantes de ${p.cantidad_total}` : "Completado"}
+                              </span>
+                            ) : (
+                              <span className="text-muted-foreground">Sin límite</span>
+                            )}
+                          </div>
+                        </div>
+                      </button>
+                    );
+                  })}
+                  <button
+                    type="button"
+                    onClick={() => setForm(f => ({ ...f, tipo_trabajo: "__otro", fase: "", fase_custom: "" }))}
+                    className={`flex items-center gap-3 p-3 rounded-xl border text-left transition-all ${form.tipo_trabajo === "__otro" ? "bg-orange-500/20 border-orange-500 ring-1 ring-orange-500" : "bg-white/5 border-white/10 hover:bg-white/10"}`}
+                  >
+                    <div className="w-10 h-10 rounded-lg bg-black/30 border border-white/5 flex items-center justify-center text-muted-foreground shrink-0"><Plus className="w-5 h-5" /></div>
+                    <span className="text-sm font-medium text-white">Otro tipo de trabajo (escribir manualmente)...</span>
+                  </button>
+                </div>
               ) : null}
-              {(partidasProyecto.length === 0 || form.tipo_trabajo === "" || !partidasProyecto.find(p => p.tipo_trabajo === form.tipo_trabajo)) && (
+              {(partidasProyecto.length === 0 || form.tipo_trabajo === "__otro" || (form.tipo_trabajo !== "" && form.tipo_trabajo !== "__otro" && !partidasProyecto.find(p => p.tipo_trabajo === form.tipo_trabajo))) && (
                 <Input
                   value={form.tipo_trabajo === "__otro" ? "" : form.tipo_trabajo}
                   onChange={(e) => setForm(f => ({ ...f, tipo_trabajo: e.target.value, fase: "", fase_custom: "" }))}
                   placeholder="Ej: Muebles, Sillas, Puertas..."
-                  className="glass-input rounded-full px-5"
+                  className="glass-input rounded-full px-5 mt-2"
                 />
               )}
             </div>
