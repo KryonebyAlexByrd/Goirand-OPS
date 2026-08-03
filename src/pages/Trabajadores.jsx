@@ -22,7 +22,8 @@ const AREA_COLORS = {
   "Corte": { card: "hover:border-orange-500/30", text: "text-orange-500", bg: "bg-orange-500/10", border: "border-orange-500/20", hoverBg: "group-hover:bg-orange-500" },
   "Barnizado": { card: "hover:border-red-500/30", text: "text-red-500", bg: "bg-red-500/10", border: "border-red-500/20", hoverBg: "group-hover:bg-red-500" },
   "Empaque": { card: "hover:border-purple-500/30", text: "text-purple-500", bg: "bg-purple-500/10", border: "border-purple-500/20", hoverBg: "group-hover:bg-purple-500" },
-  "Herraje": { card: "hover:border-zinc-500/30", text: "text-zinc-500", bg: "bg-zinc-500/10", border: "border-zinc-500/20", hoverBg: "group-hover:bg-zinc-500" }
+  "Herraje": { card: "hover:border-zinc-500/30", text: "text-zinc-500", bg: "bg-zinc-500/10", border: "border-zinc-500/20", hoverBg: "group-hover:bg-zinc-500" },
+  "Otro": { card: "hover:border-gray-500/30", text: "text-gray-400", bg: "bg-gray-500/10", border: "border-gray-500/20", hoverBg: "group-hover:bg-gray-500" }
 };
 
 export default function Trabajadores() {
