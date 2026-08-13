@@ -22,7 +22,7 @@ import Login from '@/pages/Login';
 
 import MiArea from '@/pages/MiArea';
 import MiCuenta from '@/pages/MiCuenta';
-
+import ControlContratistas from '@/pages/ControlContratistas';
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin, user, isAuthenticated } = useAuth();
 
