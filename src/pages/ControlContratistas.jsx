@@ -17,7 +17,10 @@ export default function ControlContratistas() {
 
   const { data: proyectos, isLoading } = useQuery({
     queryKey: ["proyectos"],
-    queryFn: () => supabase.from('proyecto').select('*').order('created_at', { ascending: false }).then(res => res.data || []),
+    queryFn: () => supabase.from('proyecto').select('*').order('created_date', { ascending: false }).then(res => {
+      if (res.error) console.error("Supabase Error:", res.error);
+      return res.data || [];
+    }),
   });
 
   const safeProyectos = proyectos || [];
