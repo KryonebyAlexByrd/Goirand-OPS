@@ -71,6 +71,7 @@ const AuthenticatedApp = () => {
         <Route path="/proyectos" element={<Proyectos />} />
         <Route path="/proyectos/:id" element={<ProyectoDetalle />} />
         <Route path="/contratistas" element={<Contratistas />} />
+        <Route path="/control-contratistas" element={<ControlContratistas />} />
         <Route path="/clientes" element={<Clientes />} />
         <Route path="/trabajadores" element={<Trabajadores />} />
         <Route path="/reportes" element={<Reportes />} />

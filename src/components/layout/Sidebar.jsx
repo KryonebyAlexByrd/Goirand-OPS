@@ -12,6 +12,7 @@ const navItems = [
   { label: "Historial de Registros", icon: ClipboardList, path: "/registro", description: "Historial por fecha" },
   { label: "Proyectos", icon: FolderKanban, path: "/proyectos", description: "Gestión de proyectos" },
   { label: "Contratistas", icon: HardHat, path: "/contratistas", description: "Equipo externo" },
+  { label: "O.A. Contratistas", icon: ClipboardList, path: "/control-contratistas", description: "Control y asignación" },
   { label: "Clientes", icon: Users, path: "/clientes", description: "Base de clientes" },
   { label: "Áreas", icon: LayoutDashboard, path: "/areas", description: "Métricas por área" },
   { label: "Encargados", icon: UserCircle, path: "/trabajadores", description: "Directorio de personal" },
