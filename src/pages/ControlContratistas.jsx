@@ -127,16 +127,19 @@ export default function ControlContratistas() {
         <div className="flex flex-col md:flex-row gap-4 justify-between mb-8 items-end">
           <div className="w-full md:w-1/3 space-y-2">
             <label className="text-sm font-medium text-blue-200">Seleccionar Proyecto</label>
-            <Select value={selectedProjectId} onValueChange={setSelectedProjectId}>
+            <Select value={selectedProjectId} onValueChange={setSelectedProjectId} disabled={isLoading}>
               <SelectTrigger className="bg-[#112240] border-blue-800/50 text-white h-11 rounded-xl focus:ring-orange-500">
-                <SelectValue placeholder="Selecciona un proyecto..." />
+                <SelectValue placeholder={isLoading ? "Cargando proyectos..." : "Selecciona un proyecto..."} />
               </SelectTrigger>
-              <SelectContent className="bg-[#112240] border-blue-800/50 text-white">
+              <SelectContent className="bg-[#112240] border-blue-800/50 text-white z-50">
                 {safeProyectos.filter(p => !p.parent_project_id).map(p => (
                   <SelectItem key={p.id} value={p.id} className="focus:bg-orange-500/20 focus:text-orange-400">
                     {p.numero_proyecto} - {p.descripcion}
                   </SelectItem>
                 ))}
+                {!isLoading && safeProyectos.length === 0 && (
+                  <div className="p-2 text-sm text-slate-400 text-center">No hay proyectos disponibles</div>
+                )}
               </SelectContent>
             </Select>
           </div>
