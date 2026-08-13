@@ -190,9 +190,8 @@ export default function ControlContratistas() {
                         {totalEntregadas} / {totalPiezas} ENTREGADAS
                       </span>
                     </div>
-                    {/* Add conditional indicatorColor prop if Progress doesn't support it, wait, shadcn Progress just uses bg-primary. Let's fix that. */}
                     <div className="h-1.5 mt-4 bg-[#233554] w-full rounded-full overflow-hidden">
-                      <div className="h-full bg-orange-500 transition-all" style={{ width: \`\${progress}%\` }}></div>
+                      <div className="h-full bg-orange-500 transition-all" style={{ width: `${progress}%` }}></div>
                     </div>
                   </CardHeader>
                   <CardContent className="p-0">
