@@ -15,12 +15,13 @@ export default function ControlContratistas() {
   const [isUploading, setIsUploading] = useState(false);
   const queryClient = useQueryClient();
 
-  const { data: proyectos = [], isLoading } = useQuery({
+  const { data: proyectos, isLoading } = useQuery({
     queryKey: ["proyectos"],
-    queryFn: () => supabase.from('proyecto').select('*').order('created_at', { ascending: false }).then(res => res.data),
+    queryFn: () => supabase.from('proyecto').select('*').order('created_at', { ascending: false }).then(res => res.data || []),
   });
 
-  const selectedProject = proyectos.find(p => p.id === selectedProjectId);
+  const safeProyectos = proyectos || [];
+  const selectedProject = safeProyectos.find(p => p.id === selectedProjectId);
   const partidas = Array.isArray(selectedProject?.partidas_cotizacion) ? selectedProject.partidas_cotizacion : [];
 
   const updateMutation = useMutation({
@@ -131,7 +132,7 @@ export default function ControlContratistas() {
                 <SelectValue placeholder="Selecciona un proyecto..." />
               </SelectTrigger>
               <SelectContent className="bg-[#112240] border-blue-800/50 text-white">
-                {proyectos.filter(p => !p.parent_project_id).map(p => (
+                {safeProyectos.filter(p => !p.parent_project_id).map(p => (
                   <SelectItem key={p.id} value={p.id} className="focus:bg-orange-500/20 focus:text-orange-400">
                     {p.numero_proyecto} - {p.descripcion}
                   </SelectItem>
