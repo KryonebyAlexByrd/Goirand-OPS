@@ -26,9 +26,9 @@ export function MultiSelect({
   const [open, setOpen] = useState(false);
 
   const toggleOption = (value) => {
-    const isSelected = selected.includes(value);
+    const isSelected = selected.some(s => s.toLowerCase() === value.toLowerCase());
     if (isSelected) {
-      onChange(selected.filter((item) => item !== value));
+      onChange(selected.filter((item) => item.toLowerCase() !== value.toLowerCase()));
     } else {
       onChange([...selected, value]);
     }
@@ -57,27 +57,30 @@ export function MultiSelect({
           <CommandList className="max-h-60 overflow-y-auto custom-scrollbar">
             <CommandEmpty>No se encontraron resultados.</CommandEmpty>
             <CommandGroup>
-              {options.map((option) => (
-                <CommandItem
-                  key={option.value}
-                  value={option.value}
-                  onSelect={() => toggleOption(option.value)}
-                  className="cursor-pointer hover:bg-orange-500/20 data-[selected=true]:bg-orange-500/20 text-white"
-                >
-                  <div className={cn(
-                    "mr-2 flex h-4 w-4 items-center justify-center rounded-sm border",
-                    option.isFactory ? "border-orange-500" : "border-orange-500/50",
-                    selected.includes(option.value)
-                      ? "bg-orange-500 text-white"
-                      : "opacity-50 [&_svg]:invisible"
-                  )}>
-                    <Check className="h-3 w-3" />
-                  </div>
-                  <span className={cn(option.isFactory && "text-orange-400 font-bold drop-shadow-[0_0_8px_rgba(249,115,22,0.8)]")}>
-                    {option.label}
-                  </span>
-                </CommandItem>
-              ))}
+              {options.map((option) => {
+                const isSelected = selected.some(s => s.toLowerCase() === option.value.toLowerCase());
+                return (
+                  <CommandItem
+                    key={option.value}
+                    value={option.value}
+                    onSelect={() => toggleOption(option.value)}
+                    className="cursor-pointer hover:bg-orange-500/20 data-[selected=true]:bg-orange-500/20 text-white"
+                  >
+                    <div className={cn(
+                      "mr-2 flex h-4 w-4 items-center justify-center rounded-sm border",
+                      option.isFactory ? "border-orange-500" : "border-orange-500/50",
+                      isSelected
+                        ? "bg-orange-500 text-white"
+                        : "opacity-50 [&_svg]:invisible"
+                    )}>
+                      <Check className="h-3 w-3" />
+                    </div>
+                    <span className={cn(option.isFactory && "text-orange-400 font-bold drop-shadow-[0_0_8px_rgba(249,115,22,0.8)]")}>
+                      {option.label}
+                    </span>
+                  </CommandItem>
+                );
+              })}
             </CommandGroup>
           </CommandList>
         </Command>
