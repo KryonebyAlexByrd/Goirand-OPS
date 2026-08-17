@@ -32,10 +32,25 @@ export default function ControlContratistas() {
   const isLoading = isLoadingProyectos || isLoadingContratistas;
 
   // Formatting Contratistas for Dropdowns
-  const contratistasOptions = safeContratistas.map(c => ({
-    label: c.nombre,
-    value: c.nombre
-  }));
+  const contratistasOptions = [];
+  const factories = ["Tecomatla", "Tlahuac"];
+  
+  // First add factories
+  factories.forEach(f => {
+    if (safeContratistas.some(c => c.nombre === f)) {
+      contratistasOptions.push({ label: f, value: f, isFactory: true });
+    } else {
+      // In case they weren't in DB yet, still add them for the UI
+      contratistasOptions.push({ label: f, value: f, isFactory: true });
+    }
+  });
+
+  // Then add the rest
+  safeContratistas.forEach(c => {
+    if (!factories.includes(c.nombre)) {
+      contratistasOptions.push({ label: c.nombre, value: c.nombre, isFactory: false });
+    }
+  });
 
   const updateMutation = useMutation({
     mutationFn: async ({ pId, newPartidas }) => {

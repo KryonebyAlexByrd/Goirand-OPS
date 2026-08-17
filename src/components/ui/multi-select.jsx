@@ -65,14 +65,17 @@ export function MultiSelect({
                   className="cursor-pointer hover:bg-orange-500/20 data-[selected=true]:bg-orange-500/20 text-white"
                 >
                   <div className={cn(
-                    "mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-orange-500/50",
+                    "mr-2 flex h-4 w-4 items-center justify-center rounded-sm border",
+                    option.isFactory ? "border-orange-500" : "border-orange-500/50",
                     selected.includes(option.value)
                       ? "bg-orange-500 text-white"
                       : "opacity-50 [&_svg]:invisible"
                   )}>
                     <Check className="h-3 w-3" />
                   </div>
-                  <span>{option.label}</span>
+                  <span className={cn(option.isFactory && "text-orange-400 font-bold drop-shadow-[0_0_8px_rgba(249,115,22,0.8)]")}>
+                    {option.label}
+                  </span>
                 </CommandItem>
               ))}
             </CommandGroup>
