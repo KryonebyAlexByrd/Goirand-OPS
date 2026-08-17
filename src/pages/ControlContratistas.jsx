@@ -5,7 +5,7 @@ import PageHeader from "@/components/shared/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Users, HardHat, FolderKanban, Plus, Minus, Download, Globe } from "lucide-react";
+import { Users, HardHat, FolderKanban, Plus, Minus, Download, Globe, ArrowUpDown } from "lucide-react";
 import { toast } from "sonner";
 import * as XLSX from "xlsx";
 import { MultiSelect } from "@/components/ui/multi-select";
@@ -14,6 +14,7 @@ import AIAnalyst from "@/components/ui/AIAnalyst";
 export default function ControlContratistas() {
   const [selectedProjectId, setSelectedProjectId] = useState("");
   const [selectedContratista, setSelectedContratista] = useState("");
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
   const queryClient = useQueryClient();
 
   // Queries
@@ -136,23 +137,79 @@ export default function ControlContratistas() {
     toast.success("Reporte descargado");
   };
 
+  // Sorting Logic
+  const handleSort = (key) => {
+    let direction = 'asc';
+    if (sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+  };
+
+  const sortData = (items) => {
+    if (!sortConfig.key) return items;
+    return [...items].sort((a, b) => {
+      let valA, valB;
+      switch(sortConfig.key) {
+        case 'proyecto':
+           valA = a.project?.descripcion || '';
+           valB = b.project?.descripcion || '';
+           break;
+        case 'clave':
+           valA = a.codigo || '';
+           valB = b.codigo || '';
+           break;
+        case 'descripcion':
+           valA = a.tipo_trabajo || '';
+           valB = b.tipo_trabajo || '';
+           break;
+        case 'contratistas':
+           valA = a.contratista || '';
+           valB = b.contratista || '';
+           break;
+        case 'pedido':
+           valA = a.cantidad_total || 0;
+           valB = b.cantidad_total || 0;
+           break;
+        case 'listo':
+           valA = a.cantidad_realizada || 0;
+           valB = b.cantidad_realizada || 0;
+           break;
+        case 'avance':
+           valA = a.cantidad_total > 0 ? ((a.cantidad_realizada || 0) / a.cantidad_total) : 0;
+           valB = b.cantidad_total > 0 ? ((b.cantidad_realizada || 0) / b.cantidad_total) : 0;
+           break;
+        default:
+           return 0;
+      }
+      
+      if (valA < valB) return sortConfig.direction === 'asc' ? -1 : 1;
+      if (valA > valB) return sortConfig.direction === 'asc' ? 1 : -1;
+      return 0;
+    });
+  };
+
   // Data Pre-Processing for Views
   const globalItems = [];
   safeProyectos.forEach(p => {
     const parts = Array.isArray(p.partidas_cotizacion) ? p.partidas_cotizacion : [];
     parts.forEach(part => globalItems.push({ ...part, project: p }));
   });
-  // Sort global items by project then by contractor
-  globalItems.sort((a, b) => {
-    if (a.project.descripcion < b.project.descripcion) return -1;
-    if (a.project.descripcion > b.project.descripcion) return 1;
-    const cA = a.contratista || "Sin asignar";
-    const cB = b.contratista || "Sin asignar";
-    return cA.localeCompare(cB);
-  });
+  // Default sort for global view if no explicit sort is set
+  if (!sortConfig.key) {
+    globalItems.sort((a, b) => {
+      if (a.project.descripcion < b.project.descripcion) return -1;
+      if (a.project.descripcion > b.project.descripcion) return 1;
+      const cA = a.contratista || "Sin asignar";
+      const cB = b.contratista || "Sin asignar";
+      return cA.localeCompare(cB);
+    });
+  }
+  const sortedGlobalItems = sortData(globalItems);
 
   const selectedProject = safeProyectos.find(p => p.id === selectedProjectId);
   const partidasProjectView = Array.isArray(selectedProject?.partidas_cotizacion) ? selectedProject.partidas_cotizacion : [];
+  const sortedProjectItems = sortData(partidasProjectView.map(p => ({ ...p, project: selectedProject })));
 
   const contractorItems = [];
   if (selectedContratista) {
@@ -165,6 +222,19 @@ export default function ControlContratistas() {
       });
     });
   }
+  const sortedContractorItems = sortData(contractorItems);
+
+  const renderSortableHeader = (label, key, className = "") => (
+    <th 
+      className={`px-3 py-3 font-semibold cursor-pointer hover:text-white transition-colors ${className}`}
+      onClick={() => handleSort(key)}
+    >
+      <div className="flex items-center gap-1">
+        {label}
+        <ArrowUpDown className={`w-3 h-3 ${sortConfig.key === key ? 'text-orange-400' : 'text-blue-300/50'}`} />
+      </div>
+    </th>
+  );
 
   // Common Table Row Renderer
   const renderTableRow = (p, project, showProjectName = false) => {
@@ -260,7 +330,7 @@ export default function ControlContratistas() {
           <TabsContent value="global" className="mt-0 space-y-6">
             <div className="flex justify-between items-center mb-2">
               <p className="text-sm text-slate-400">Mostrando todas las partidas de la fábrica agrupadas por proyecto.</p>
-              <Button onClick={() => handleExportExcel(globalItems, `Reporte_Global_Goirand`)} className="bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg h-9">
+              <Button onClick={() => handleExportExcel(sortedGlobalItems, `Reporte_Global_Goirand`)} className="bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg h-9">
                 <Download className="w-4 h-4 mr-2" /> Exportar Global
               </Button>
             </div>
@@ -269,19 +339,19 @@ export default function ControlContratistas() {
                 <thead className="text-xs text-blue-300 uppercase bg-[#0a192f]/95 sticky top-0 z-20 border-b border-[#233554] shadow-sm backdrop-blur-md">
                   <tr>
                     <th className="px-3 py-3 font-semibold w-[50px]">Img</th>
-                    <th className="px-3 py-3 font-semibold">Proyecto</th>
-                    <th className="px-3 py-3 font-semibold">Clave</th>
-                    <th className="px-3 py-3 font-semibold">Descripción</th>
-                    <th className="px-3 py-3 font-semibold">Contratistas (Multi)</th>
-                    <th className="px-3 py-3 font-semibold text-center w-[80px]">Pedido</th>
-                    <th className="px-3 py-3 font-semibold text-center w-[80px]">Listo</th>
-                    <th className="px-3 py-3 font-semibold text-center w-[150px]">Avance</th>
+                    {renderSortableHeader("Proyecto", "proyecto")}
+                    {renderSortableHeader("Clave", "clave")}
+                    {renderSortableHeader("Descripción", "descripcion")}
+                    {renderSortableHeader("Contratistas", "contratistas")}
+                    {renderSortableHeader("Pedido", "pedido", "text-center w-[80px]")}
+                    {renderSortableHeader("Listo", "listo", "text-center w-[80px]")}
+                    {renderSortableHeader("Avance", "avance", "text-center w-[150px]")}
                     <th className="px-3 py-3 font-semibold text-right w-[100px]">Editar</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#233554]/30">
-                  {globalItems.map(p => renderTableRow(p, p.project, true))}
-                  {globalItems.length === 0 && (
+                  {sortedGlobalItems.map(p => renderTableRow(p, p.project, true))}
+                  {sortedGlobalItems.length === 0 && (
                     <tr><td colSpan={9} className="text-center py-10 text-slate-500">No hay datos en la fábrica.</td></tr>
                   )}
                 </tbody>
@@ -308,7 +378,7 @@ export default function ControlContratistas() {
                 </Select>
               </div>
               {selectedProjectId && (
-                <Button onClick={() => handleExportExcel(partidasProjectView, `Reporte_Proyecto_${selectedProject?.descripcion}`)} className="bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg h-11">
+                <Button onClick={() => handleExportExcel(sortedProjectItems, `Reporte_Proyecto_${selectedProject?.descripcion}`)} className="bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg h-11">
                   <Download className="w-4 h-4 mr-2" /> Exportar Excel
                 </Button>
               )}
@@ -318,18 +388,18 @@ export default function ControlContratistas() {
                 <table className="w-full text-sm text-left">
                   <thead className="text-xs text-blue-300 uppercase bg-[#0a192f]/80 sticky top-0 z-10 border-b border-[#233554]">
                     <tr>
-                      <th className="px-3 py-4 font-semibold w-[50px]">Img</th>
-                      <th className="px-3 py-4 font-semibold">Clave</th>
-                      <th className="px-3 py-4 font-semibold">Descripción</th>
-                      <th className="px-3 py-4 font-semibold">Contratistas (Multi)</th>
-                      <th className="px-3 py-4 font-semibold text-center w-[80px]">Pedido</th>
-                      <th className="px-3 py-4 font-semibold text-center w-[80px]">Listo</th>
-                      <th className="px-3 py-4 font-semibold text-center w-[150px]">Avance</th>
-                      <th className="px-3 py-4 font-semibold text-right w-[100px]">Editar</th>
+                      <th className="px-3 py-3 font-semibold w-[50px]">Img</th>
+                      {renderSortableHeader("Clave", "clave")}
+                      {renderSortableHeader("Descripción", "descripcion")}
+                      {renderSortableHeader("Contratistas", "contratistas")}
+                      {renderSortableHeader("Pedido", "pedido", "text-center w-[80px]")}
+                      {renderSortableHeader("Listo", "listo", "text-center w-[80px]")}
+                      {renderSortableHeader("Avance", "avance", "text-center w-[150px]")}
+                      <th className="px-3 py-3 font-semibold text-right w-[100px]">Editar</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#233554]/30">
-                    {partidasProjectView.map(p => renderTableRow(p, selectedProject, false))}
+                    {sortedProjectItems.map(p => renderTableRow(p, selectedProject, false))}
                   </tbody>
                 </table>
               </div>
@@ -360,7 +430,7 @@ export default function ControlContratistas() {
                 </Select>
               </div>
               {selectedContratista && (
-                <Button onClick={() => handleExportExcel(contractorItems, `Reporte_Contratista_${selectedContratista}`)} className="bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg h-11">
+                <Button onClick={() => handleExportExcel(sortedContractorItems, `Reporte_Contratista_${selectedContratista}`)} className="bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg h-11">
                   <Download className="w-4 h-4 mr-2" /> Exportar Excel
                 </Button>
               )}
@@ -370,19 +440,19 @@ export default function ControlContratistas() {
                 <table className="w-full text-sm text-left">
                   <thead className="text-xs text-blue-300 uppercase bg-[#0a192f]/80 sticky top-0 z-10 border-b border-[#233554]">
                     <tr>
-                      <th className="px-3 py-4 font-semibold w-[50px]">Img</th>
-                      <th className="px-3 py-4 font-semibold">Proyecto</th>
-                      <th className="px-3 py-4 font-semibold">Clave</th>
-                      <th className="px-3 py-4 font-semibold">Descripción</th>
-                      <th className="px-3 py-4 font-semibold">Contratistas (Multi)</th>
-                      <th className="px-3 py-4 font-semibold text-center w-[80px]">Pedido</th>
-                      <th className="px-3 py-4 font-semibold text-center w-[80px]">Listo</th>
-                      <th className="px-3 py-4 font-semibold text-center w-[150px]">Avance</th>
-                      <th className="px-3 py-4 font-semibold text-right w-[100px]">Editar</th>
+                      <th className="px-3 py-3 font-semibold w-[50px]">Img</th>
+                      {renderSortableHeader("Proyecto", "proyecto")}
+                      {renderSortableHeader("Clave", "clave")}
+                      {renderSortableHeader("Descripción", "descripcion")}
+                      {renderSortableHeader("Contratistas", "contratistas")}
+                      {renderSortableHeader("Pedido", "pedido", "text-center w-[80px]")}
+                      {renderSortableHeader("Listo", "listo", "text-center w-[80px]")}
+                      {renderSortableHeader("Avance", "avance", "text-center w-[150px]")}
+                      <th className="px-3 py-3 font-semibold text-right w-[100px]">Editar</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#233554]/30">
-                    {contractorItems.map(p => renderTableRow(p, p.project, true))}
+                    {sortedContractorItems.map(p => renderTableRow(p, p.project, true))}
                   </tbody>
                 </table>
               </div>
@@ -400,7 +470,7 @@ export default function ControlContratistas() {
         <AIAnalyst 
           proyectos={safeProyectos} 
           onExecuteChanges={handleExecuteAIChanges}
-          onExportExcel={(filename) => handleExportExcel(globalItems, filename)}
+          onExportExcel={(filename) => handleExportExcel(sortedGlobalItems, filename)}
         />
 
       </div>
