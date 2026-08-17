@@ -213,10 +213,12 @@ export default function ControlContratistas() {
 
   const contractorItems = [];
   if (selectedContratista) {
+    const searchTarget = selectedContratista.toUpperCase();
     safeProyectos.forEach(p => {
       const parts = Array.isArray(p.partidas_cotizacion) ? p.partidas_cotizacion : [];
       parts.forEach(part => {
-        if ((part.contratista || "Sin asignar").includes(selectedContratista)) {
+        const assignedArray = (part.contratista || "Sin asignar").split(" / ").map(s => s.trim().toUpperCase());
+        if (assignedArray.includes(searchTarget)) {
           contractorItems.push({ ...part, project: p });
         }
       });
