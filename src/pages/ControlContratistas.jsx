@@ -84,6 +84,19 @@ export default function ControlContratistas() {
     updateMutation.mutate({ pId, newPartidas });
   };
 
+  const handleAdjustDate = (project, codigo, tipo_trabajo, newDate) => {
+    const pId = project.id;
+    const currentPartidas = Array.isArray(project.partidas_cotizacion) ? project.partidas_cotizacion : [];
+    
+    const newPartidas = currentPartidas.map(p => {
+      if (p.codigo === codigo && p.tipo_trabajo === tipo_trabajo) {
+        return { ...p, fecha_estimada: newDate || null };
+      }
+      return p;
+    });
+    updateMutation.mutate({ pId, newPartidas });
+  };
+
   const handleReassignContractor = (project, codigo, tipo_trabajo, newContractorsArray) => {
     const pId = project.id;
     const currentPartidas = Array.isArray(project.partidas_cotizacion) ? project.partidas_cotizacion : [];
@@ -126,6 +139,7 @@ export default function ControlContratistas() {
       "Clave": p.codigo || "",
       "Descripción": p.tipo_trabajo || "",
       "Contratista Asignado": p.contratista || "Sin asignar",
+      "Entrega": p.fecha_estimada || "Sin definir",
       "Pedido": p.cantidad_total || 0,
       "Completado": p.cantidad_realizada || 0,
       "Faltan": Math.max(0, (p.cantidad_total || 0) - (p.cantidad_realizada || 0))
@@ -166,6 +180,10 @@ export default function ControlContratistas() {
         case 'contratistas':
            valA = a.contratista || '';
            valB = b.contratista || '';
+           break;
+        case 'entrega':
+           valA = a.fecha_estimada || '9999-12-31';
+           valB = b.fecha_estimada || '9999-12-31';
            break;
         case 'pedido':
            valA = a.cantidad_total || 0;
@@ -280,6 +298,14 @@ export default function ControlContratistas() {
             className="w-full bg-[#112240] border-[#233554] text-xs focus:ring-orange-500"
           />
         </td>
+        <td className="p-3 align-middle text-center w-[130px]">
+          <input 
+            type="date" 
+            value={p.fecha_estimada || ""}
+            onChange={(e) => handleAdjustDate(project, p.codigo, p.tipo_trabajo, e.target.value)}
+            className="bg-[#0a192f] border border-[#233554] text-slate-300 rounded text-xs p-1 focus:ring-orange-500 w-full cursor-pointer hover:border-orange-500/50 transition-colors"
+          />
+        </td>
         <td className="p-3 align-middle text-center font-medium">{p.cantidad_total || 0}</td>
         <td className="p-3 align-middle text-center font-bold text-white">{p.cantidad_realizada || 0}</td>
         <td className="p-3 align-middle min-w-[120px]">
@@ -345,6 +371,7 @@ export default function ControlContratistas() {
                     {renderSortableHeader("Clave", "clave")}
                     {renderSortableHeader("Descripción", "descripcion")}
                     {renderSortableHeader("Contratistas", "contratistas")}
+                    {renderSortableHeader("Entrega", "entrega", "text-center w-[130px]")}
                     {renderSortableHeader("Pedido", "pedido", "text-center w-[80px]")}
                     {renderSortableHeader("Listo", "listo", "text-center w-[80px]")}
                     {renderSortableHeader("Avance", "avance", "text-center w-[150px]")}
@@ -354,7 +381,7 @@ export default function ControlContratistas() {
                 <tbody className="divide-y divide-[#233554]/30">
                   {sortedGlobalItems.map(p => renderTableRow(p, p.project, true))}
                   {sortedGlobalItems.length === 0 && (
-                    <tr><td colSpan={9} className="text-center py-10 text-slate-500">No hay datos en la fábrica.</td></tr>
+                    <tr><td colSpan={10} className="text-center py-10 text-slate-500">No hay datos en la fábrica.</td></tr>
                   )}
                 </tbody>
               </table>
@@ -394,6 +421,7 @@ export default function ControlContratistas() {
                       {renderSortableHeader("Clave", "clave")}
                       {renderSortableHeader("Descripción", "descripcion")}
                       {renderSortableHeader("Contratistas", "contratistas")}
+                      {renderSortableHeader("Entrega", "entrega", "text-center w-[130px]")}
                       {renderSortableHeader("Pedido", "pedido", "text-center w-[80px]")}
                       {renderSortableHeader("Listo", "listo", "text-center w-[80px]")}
                       {renderSortableHeader("Avance", "avance", "text-center w-[150px]")}
@@ -447,6 +475,7 @@ export default function ControlContratistas() {
                       {renderSortableHeader("Clave", "clave")}
                       {renderSortableHeader("Descripción", "descripcion")}
                       {renderSortableHeader("Contratistas", "contratistas")}
+                      {renderSortableHeader("Entrega", "entrega", "text-center w-[130px]")}
                       {renderSortableHeader("Pedido", "pedido", "text-center w-[80px]")}
                       {renderSortableHeader("Listo", "listo", "text-center w-[80px]")}
                       {renderSortableHeader("Avance", "avance", "text-center w-[150px]")}
