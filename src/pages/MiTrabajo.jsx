@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Camera, Upload, X, Loader2, ClipboardList, LogOut, Plus, Pencil, Trash2, CheckCircle2 } from "lucide-react";
+import { Camera, Upload, X, Loader2, ClipboardList, LogOut, Plus, Pencil, Trash2, CheckCircle2, Package } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
