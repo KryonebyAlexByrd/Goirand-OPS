@@ -25,7 +25,10 @@ export default function Login() {
   const [error, setError] = useState(null);
   const { isAuthenticated, loginLocal } = useAuth();
   const [perfiles, setPerfiles] = useState([]);
+  const [contratistas, setContratistas] = useState([]);
   
+  const [loginMode, setLoginMode] = useState('staff'); // 'staff' or 'contratista'
+
   // Login State
   const [selectedProfileId, setSelectedProfileId] = useState('');
   const [step, setStep] = useState('select'); // 'select', 'enter_password', 'create_password'
@@ -36,13 +39,14 @@ export default function Login() {
   const [regArea, setRegArea] = useState('');
 
   useEffect(() => {
-    const fetchPerfiles = async () => {
-      const { data, error } = await supabase.from('perfil_encargado').select('*').order('nombre');
-      if (!error && data) {
-        setPerfiles(data);
-      }
+    const fetchUsers = async () => {
+      const { data: pData } = await supabase.from('perfil_encargado').select('*').order('nombre');
+      if (pData) setPerfiles(pData);
+
+      const { data: cData } = await supabase.from('contratista').select('id, nombre, password_cifrada').order('nombre');
+      if (cData) setContratistas(cData);
     };
-    fetchPerfiles();
+    fetchUsers();
   }, []);
 
   if (isAuthenticated) {
@@ -55,17 +59,21 @@ export default function Login() {
       setError("Por favor selecciona tu usuario.");
       return;
     }
-    const perfil = perfiles.find(p => p.id === selectedProfileId);
-    if (!perfil) {
+
+    const isContratista = loginMode === 'contratista';
+    const list = isContratista ? contratistas : perfiles;
+    const user = list.find(u => u.id === selectedProfileId);
+
+    if (!user) {
       setError("Usuario no encontrado.");
       return;
     }
+    
     // Check if password exists
-    if (!perfil.password_cifrada) {
+    if (!user.password_cifrada) {
       // If they have no password set, let them in directly.
-      // They can configure their password later in 'Mi Cuenta'.
-      loginLocal(perfil);
-      toast.success(`¡Bienvenido, ${perfil.nombre}!`);
+      loginLocal(user, isContratista ? 'contratista' : 'encargado');
+      toast.success(`¡Bienvenido, ${user.nombre}!`);
     } else {
       setStep('enter_password');
     }
@@ -74,7 +82,10 @@ export default function Login() {
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
     setError(null);
-    const perfil = perfiles.find(p => p.id === selectedProfileId);
+    
+    const isContratista = loginMode === 'contratista';
+    const list = isContratista ? contratistas : perfiles;
+    const user = list.find(u => u.id === selectedProfileId);
     
     if (step === 'create_password') {
       if (!passwordInput || passwordInput.length < 4) {
@@ -82,34 +93,36 @@ export default function Login() {
         return;
       }
       setLoading(true);
+      
+      const table = isContratista ? 'contratista' : 'perfil_encargado';
       const { error: updateError } = await supabase
-        .from('perfil_encargado')
+        .from(table)
         .update({ password_cifrada: passwordInput })
-        .eq('id', perfil.id);
+        .eq('id', user.id);
+      
       setLoading(false);
       
       if (updateError) {
         setError("Error al guardar la contraseña.");
         return;
       }
-      perfil.password_cifrada = passwordInput;
-      loginLocal(perfil);
-      toast.success(`¡Contraseña creada! Bienvenido, ${perfil.nombre}.`);
+      user.password_cifrada = passwordInput;
+      loginLocal(user, isContratista ? 'contratista' : 'encargado');
+      toast.success(`¡Contraseña creada! Bienvenido, ${user.nombre}.`);
     } else if (step === 'enter_password') {
-      if (perfil.area_principal === "Admin" && !perfil.password_cifrada) {
-        // Fallback for admin if no DB password is set yet
+      if (!isContratista && user.area_principal === "Admin" && !user.password_cifrada) {
         if (passwordInput !== "goirandreal") {
            setError("Contraseña incorrecta.");
            return;
         }
       } else {
-        if (passwordInput !== perfil.password_cifrada) {
+        if (passwordInput !== user.password_cifrada) {
           setError("Contraseña incorrecta.");
           return;
         }
       }
-      loginLocal(perfil);
-      toast.success(`¡Bienvenido de vuelta, ${perfil.nombre}!`);
+      loginLocal(user, isContratista ? 'contratista' : 'encargado');
+      toast.success(`¡Bienvenido de vuelta, ${user.nombre}!`);
     }
   };
 
@@ -134,7 +147,6 @@ export default function Login() {
     setError(null);
     
     try {
-      // Create a fake email and password to satisfy Supabase Auth requirements silently
       const fakeEmail = `${Date.now()}-${Math.random().toString(36).substring(7)}@goirand.local`;
       const fakePassword = crypto.randomUUID();
 
@@ -156,15 +168,13 @@ export default function Login() {
         throw new Error(data.error || 'Error al registrar el perfil');
       }
 
-      // Fetch updated profiles
       const { data: updatedPerfiles } = await supabase.from('perfil_encargado').select('*').order('nombre');
       if (updatedPerfiles) setPerfiles(updatedPerfiles);
 
-      // Fetch the newly created profile and log them in
       const { data: newPerfil } = await supabase.from('perfil_encargado').select('*').eq('id', data.user.id).single();
       
       if (newPerfil) {
-        loginLocal(newPerfil);
+        loginLocal(newPerfil, 'encargado');
         toast.success(`¡Registro exitoso! Entrando como ${newPerfil.nombre}`);
       } else {
         throw new Error("No se pudo cargar el perfil recién creado.");
@@ -176,18 +186,21 @@ export default function Login() {
     }
   };
 
+  const resetForm = () => {
+    setStep('select');
+    setSelectedProfileId('');
+    setPasswordInput('');
+    setError(null);
+  };
+
   return (
     <div className="flex min-h-screen w-full items-center justify-center p-4 relative overflow-hidden bg-black">
-      
-      {/* Animated Hexagrid Background (Silver & Black) */}
       <div className="absolute inset-0 z-0 hex-bg"></div>
       
-      {/* Animated Glowing Orbs (Orange & Silver) */}
       <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-orange-600/30 blur-[100px] rounded-full mix-blend-screen pointer-events-none animate-pulse-slow"></div>
       <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-zinc-400/20 blur-[120px] rounded-full mix-blend-screen pointer-events-none animate-pulse-slow" style={{ animationDelay: '2s' }}></div>
 
       <style>{`
-        /* Moving Hexagrid */
         .hex-bg {
           background-color: #050505;
           background-image: 
@@ -207,8 +220,6 @@ export default function Login() {
         .animate-pulse-slow {
           animation: pulseSlow 8s ease-in-out infinite;
         }
-
-        /* Orange Card with Geometric Details */
         .card-orange-geo {
           background-color: #ea580c;
           background-image: 
@@ -219,8 +230,6 @@ export default function Login() {
           border: 1px solid rgba(255, 255, 255, 0.2);
           box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.9), 0 0 40px rgba(234, 88, 12, 0.4);
         }
-
-        /* Glass Elements inside Card */
         .glass-input {
           background: rgba(0, 0, 0, 0.25);
           border: 1px solid rgba(255, 255, 255, 0.15);
@@ -242,7 +251,6 @@ export default function Login() {
         <div className="absolute inset-0 bg-white/5 mix-blend-overlay pointer-events-none rounded-[2rem]"></div>
         <CardHeader className="space-y-4 text-center pb-6 pt-10 relative z-10">
           <div className="flex justify-center mb-1">
-            {/* Minimalist Professional Logo (White/Silver on Orange) */}
             <div className="w-20 h-20 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center shadow-2xl border border-white/20 relative">
               <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-white drop-shadow-md">
                 <path d="M12 2L2 7l10 5 10-5-10-5Z"/>
@@ -256,27 +264,58 @@ export default function Login() {
           </CardTitle>
         </CardHeader>
         <CardContent className="relative z-10">
-          <Tabs defaultValue="login" className="w-full">
+          <Tabs defaultValue="login" className="w-full" onValueChange={() => resetForm()}>
             <TabsList className="grid w-full grid-cols-2 mb-6 rounded-full bg-black/20 p-1 border border-white/10 backdrop-blur-sm">
               <TabsTrigger value="login" className="rounded-full data-[state=active]:bg-white data-[state=active]:text-orange-600 text-white transition-all font-bold">Ingresar</TabsTrigger>
               <TabsTrigger value="register" className="rounded-full data-[state=active]:bg-white data-[state=active]:text-orange-600 text-white transition-all font-bold">Nuevo Perfil</TabsTrigger>
             </TabsList>
 
             <TabsContent value="login" className="mt-0">
+              
+              {/* Type toggle */}
+              {step === 'select' && (
+                <div className="flex gap-2 mb-4">
+                  <Button 
+                    type="button" 
+                    variant={loginMode === 'staff' ? 'default' : 'outline'}
+                    onClick={() => { setLoginMode('staff'); setSelectedProfileId(''); }}
+                    className={`flex-1 rounded-full h-10 ${loginMode === 'staff' ? 'bg-white text-orange-600 font-bold hover:bg-zinc-100' : 'bg-transparent text-white border-white/30 hover:bg-white/10'}`}
+                  >
+                    Soy Staff
+                  </Button>
+                  <Button 
+                    type="button" 
+                    variant={loginMode === 'contratista' ? 'default' : 'outline'}
+                    onClick={() => { setLoginMode('contratista'); setSelectedProfileId(''); }}
+                    className={`flex-1 rounded-full h-10 ${loginMode === 'contratista' ? 'bg-white text-orange-600 font-bold hover:bg-zinc-100' : 'bg-transparent text-white border-white/30 hover:bg-white/10'}`}
+                  >
+                    Soy Contratista
+                  </Button>
+                </div>
+              )}
+
               {step === 'select' && (
                 <form onSubmit={handleNextStep} className="space-y-4">
                   <div className="space-y-2">
-                    <Label className="text-white/90 ml-2 font-semibold">¿Quién eres?</Label>
+                    <Label className="text-white/90 ml-2 font-semibold">Selecciona tu perfil</Label>
                     <Select value={selectedProfileId} onValueChange={setSelectedProfileId} required>
                       <SelectTrigger className="glass-input rounded-full h-12 px-5 ring-offset-orange-600 focus:ring-white/50">
-                        <SelectValue placeholder="Selecciona tu nombre..." />
+                        <SelectValue placeholder="Busca tu nombre..." />
                       </SelectTrigger>
                       <SelectContent className="bg-white border-none text-zinc-900 rounded-xl shadow-xl max-h-[300px]">
-                        {perfiles.map(p => (
-                          <SelectItem key={p.id} value={p.id} className="focus:bg-orange-100 focus:text-orange-700 rounded-lg cursor-pointer font-medium py-3">
-                            {p.nombre} <span className="text-zinc-500 text-sm ml-2">({p.area_principal})</span>
-                          </SelectItem>
-                        ))}
+                        {loginMode === 'staff' ? (
+                          perfiles.map(p => (
+                            <SelectItem key={p.id} value={p.id} className="focus:bg-orange-100 focus:text-orange-700 rounded-lg cursor-pointer font-medium py-3">
+                              {p.nombre} <span className="text-zinc-500 text-sm ml-2">({p.area_principal})</span>
+                            </SelectItem>
+                          ))
+                        ) : (
+                          contratistas.map(c => (
+                            <SelectItem key={c.id} value={c.id} className="focus:bg-orange-100 focus:text-orange-700 rounded-lg cursor-pointer font-medium py-3">
+                              {c.nombre}
+                            </SelectItem>
+                          ))
+                        )}
                       </SelectContent>
                     </Select>
                   </div>

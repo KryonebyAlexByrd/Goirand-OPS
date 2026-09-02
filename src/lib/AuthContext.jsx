@@ -14,6 +14,7 @@ export const AuthProvider = ({ children }) => {
     const initAuth = async () => {
       try {
         const storedId = localStorage.getItem('encargado_id');
+        const storedContratistaId = localStorage.getItem('contratista_id');
         
         if (storedId) {
           const { data: perfil, error } = await supabase
@@ -25,7 +26,6 @@ export const AuthProvider = ({ children }) => {
           if (error) throw error;
           
           if (perfil) {
-            // Reconstruct a user-like object for the app
             setUser({ 
               id: perfil.id, 
               perfil_encargado: perfil,
@@ -33,8 +33,28 @@ export const AuthProvider = ({ children }) => {
             });
             setIsAuthenticated(true);
           } else {
-            // ID no longer exists
             localStorage.removeItem('encargado_id');
+            setUser(null);
+            setIsAuthenticated(false);
+          }
+        } else if (storedContratistaId) {
+          const { data: contratista, error } = await supabase
+            .from('contratista')
+            .select('*')
+            .eq('id', storedContratistaId)
+            .maybeSingle();
+            
+          if (error) throw error;
+          
+          if (contratista) {
+            setUser({ 
+              id: contratista.id, 
+              contratista: contratista,
+              role: "contratista"
+            });
+            setIsAuthenticated(true);
+          } else {
+            localStorage.removeItem('contratista_id');
             setUser(null);
             setIsAuthenticated(false);
           }
@@ -54,18 +74,28 @@ export const AuthProvider = ({ children }) => {
     initAuth();
   }, []);
 
-  const loginLocal = async (perfil) => {
-    localStorage.setItem('encargado_id', perfil.id);
-    setUser({ 
-      id: perfil.id, 
-      perfil_encargado: perfil,
-      role: perfil.area_principal === "Admin" ? "admin" : "user"
-    });
+  const loginLocal = async (perfil, type = 'encargado') => {
+    if (type === 'contratista') {
+      localStorage.setItem('contratista_id', perfil.id);
+      setUser({ 
+        id: perfil.id, 
+        contratista: perfil,
+        role: "contratista"
+      });
+    } else {
+      localStorage.setItem('encargado_id', perfil.id);
+      setUser({ 
+        id: perfil.id, 
+        perfil_encargado: perfil,
+        role: perfil.area_principal === "Admin" ? "admin" : "user"
+      });
+    }
     setIsAuthenticated(true);
   };
 
   const logout = async (shouldRedirect = true) => {
     localStorage.removeItem('encargado_id');
+    localStorage.removeItem('contratista_id');
     setUser(null);
     setIsAuthenticated(false);
     

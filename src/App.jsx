@@ -23,6 +23,8 @@ import Login from '@/pages/Login';
 import MiArea from '@/pages/MiArea';
 import MiCuenta from '@/pages/MiCuenta';
 import ControlContratistas from '@/pages/ControlContratistas';
+import PortalContratista from '@/pages/PortalContratista';
+
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin, user, isAuthenticated } = useAuth();
 
@@ -48,6 +50,17 @@ const AuthenticatedApp = () => {
 
   // Admins ven todo (role === 'admin')
   const isAdmin = user?.role === "admin" || user?.user_metadata?.role === "admin";
+  const isContratista = user?.role === "contratista";
+
+  if (isContratista) {
+    return (
+      <Routes>
+        <Route path="/" element={<Navigate to="/mi-portal" replace />} />
+        <Route path="/mi-portal" element={<PortalContratista />} />
+        <Route path="*" element={<Navigate to="/mi-portal" replace />} />
+      </Routes>
+    );
+  }
 
   if (!isAdmin) {
     return (
